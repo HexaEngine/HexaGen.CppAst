@@ -1,3 +1,5 @@
+# This is a fork of CppAst.NET, specifically tailored to HexaGen.
+
 # CppAst.NET [![ci](https://github.com/xoofx/CppAst.NET/actions/workflows/ci.yml/badge.svg)](https://github.com/xoofx/CppAst.NET/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/xoofx/CppAst.NET/badge.svg?branch=main)](https://coveralls.io/github/xoofx/CppAst.NET?branch=main) [![NuGet](https://img.shields.io/nuget/v/CppAst.svg)](https://www.nuget.org/packages/CppAst/)
 
 <img align="right" width="160px" height="160px" src="https://raw.githubusercontent.com/xoofx/CppAst.NET/main/img/cppast.png">
