@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaGen.CppAst", "HexaGen.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexaGen.CppAst.Tests", "HexaGen.CppAst.Tests\HexaGen.CppAst.Tests.csproj", "{38D72EE2-92FA-A759-6710-5022401CBB72}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{11B3335F-5856-48E0-8D0B-2E6EB0D0DFFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{38D72EE2-92FA-A759-6710-5022401CBB72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D72EE2-92FA-A759-6710-5022401CBB72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38D72EE2-92FA-A759-6710-5022401CBB72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11B3335F-5856-48E0-8D0B-2E6EB0D0DFFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11B3335F-5856-48E0-8D0B-2E6EB0D0DFFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11B3335F-5856-48E0-8D0B-2E6EB0D0DFFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11B3335F-5856-48E0-8D0B-2E6EB0D0DFFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
