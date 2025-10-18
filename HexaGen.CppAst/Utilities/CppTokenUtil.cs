@@ -530,7 +530,7 @@ namespace HexaGen.CppAst.Utilities
                     var tokenRange = token.GetExtent(_tu);
                     cppToken = new CppToken(cppTokenKind, tokenStr)
                     {
-                        Span = new CppSourceSpan(CppModelBuilder.GetSourceLocation(tokenRange.Start), CppModelBuilder.GetSourceLocation(tokenRange.End))
+                        Span = tokenRange.ToSourceRange()
                     };
                     _tu.DisposeTokens(tokens);
                     return cppToken;

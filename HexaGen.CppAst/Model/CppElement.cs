@@ -2,9 +2,11 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Declarations;
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Metadata;
+using HexaGen.CppAst.Parsing;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -75,5 +77,15 @@ namespace HexaGen.CppAst.Model
         /// Gets the source file of this element.
         /// </summary>
         public string SourceFile => Span.Start.File;
+
+        public void AssignSourceSpan(in CXCursor cursor)
+        {
+            var start = cursor.Extent.Start;
+            var end = cursor.Extent.End;
+            if (Span.Start.File is null)
+            {
+                Span = new CppSourceSpan(start.ToSourceLocation(), end.ToSourceLocation());
+            }
+        }
     }
 }

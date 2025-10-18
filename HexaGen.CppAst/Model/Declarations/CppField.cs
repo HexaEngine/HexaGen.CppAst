@@ -81,7 +81,12 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Gets or sets the offset of the field in bytes.
         /// </summary>
-        public long Offset { get; set; }
+        public long Offset { get => BitOffset / 8; }
+
+        /// <summary>
+        /// Gets or sets the offset of the field in bytes.
+        /// </summary>
+        public long BitOffset { get; set; }
 
         /// <inheritdoc />
         public override string ToString()

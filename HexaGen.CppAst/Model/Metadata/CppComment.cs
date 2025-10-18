@@ -336,7 +336,7 @@ namespace HexaGen.CppAst.Model.Metadata
         {
         }
 
-        public string Text { get; set; }
+        public string? Text { get; set; }
 
         protected internal override void ToString(StringBuilder builder)
         {

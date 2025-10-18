@@ -7,7 +7,7 @@ using Hexa.NET.Utilities;
 
 namespace HexaGen.CppAst.Parsing
 {
-    internal struct CursorKey : IEquatable<CursorKey>
+    public struct CursorKey : IEquatable<CursorKey>
     {
         public ResolverScope scope;
         public CXCursor cursor;

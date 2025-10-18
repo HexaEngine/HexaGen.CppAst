@@ -7,7 +7,7 @@
     using System.Diagnostics.CodeAnalysis;
 
     [Flags]
-    internal enum ResolverScope
+    public enum ResolverScope
     {
         None = 0,
         System = 1,
@@ -15,7 +15,7 @@
         All = System | User,
     }
 
-    internal class TypedefResolver
+    public class TypedefResolver
     {
         private readonly Dictionary<CursorKey, CppType> typedefs = [];
 

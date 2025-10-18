@@ -99,15 +99,19 @@ namespace HexaGen.CppAst.Parsing
             {
                 case CppParserKind.None:
                     break;
+
                 case CppParserKind.Cpp:
                     arguments.Add("-xc++");
                     break;
+
                 case CppParserKind.C:
                     arguments.Add("-xc");
                     break;
+
                 case CppParserKind.ObjC:
                     arguments.Add("-xobjective-c");
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -207,6 +211,7 @@ namespace HexaGen.CppAst.Parsing
                                 case CXDiagnosticSeverity.CXDiagnostic_Note:
                                     compilation.Diagnostics.Info(message, location);
                                     break;
+
                                 case CXDiagnosticSeverity.CXDiagnostic_Warning:
                                     // Avoid warning from clang (0, 0): warning: argument unused during compilation: '-fsyntax-only'
                                     if (!message.Contains("-fsyntax-only"))
@@ -214,6 +219,7 @@ namespace HexaGen.CppAst.Parsing
                                         compilation.Diagnostics.Warning(message, location);
                                     }
                                     break;
+
                                 case CXDiagnosticSeverity.CXDiagnostic_Error:
                                 case CXDiagnosticSeverity.CXDiagnostic_Fatal:
                                     compilation.Diagnostics.Error(message, location);
@@ -243,7 +249,7 @@ namespace HexaGen.CppAst.Parsing
         {
             var builder = new StringBuilder();
             builder.Append(diagnostic.ToString());
-            location = CppModelBuilder.GetSourceLocation(diagnostic.Location);
+            location = diagnostic.GetSourceLocation();
             if (location.File == CppAstRootFileName)
             {
                 var reader = new StringReader(rootContent);
@@ -291,12 +297,16 @@ namespace HexaGen.CppAst.Parsing
             {
                 case CppTargetCpu.X86:
                     return "i686";
+
                 case CppTargetCpu.X86_64:
                     return "x86_64";
+
                 case CppTargetCpu.ARM:
                     return "arm";
+
                 case CppTargetCpu.ARM64:
                     return "aarch64";
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetCpu), targetCpu, null);
             }
