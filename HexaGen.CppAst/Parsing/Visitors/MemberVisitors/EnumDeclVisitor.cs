@@ -13,7 +13,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var cppEnum = Builder.GetOrCreateDeclarationContainer<CppEnum>(cursor, out var context);
+            var cppEnum = Context.GetOrCreateDeclContainer<CppEnum>(cursor, out var context);
             if (cursor.IsDefinition && !context.IsChildrenVisited)
             {
                 var integralType = cursor.EnumDecl_IntegerType;

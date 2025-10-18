@@ -11,25 +11,19 @@ namespace HexaGen.CppAst.Parsing
 
         public CppContainerContext Container { get; internal set; } = null!;
 
-        public CppContainerContext CurrentRootContainer => Builder.CurrentRootContainer;
+        public CppContainerContext CurrentRootContainer => Context.CurrentRootContainer;
 
-        public TypedefResolver TypedefResolver => Builder.TypedefResolver;
+        public TypedefResolver TypedefResolver => Context.TypedefResolver;
 
-        public CppCompilation RootCompilation => Builder.RootCompilation;
+        public CppCompilation RootCompilation => Context.RootCompilation;
 
         public abstract IEnumerable<CXCursorKind> Kinds { get; }
-
-        public virtual bool CreateContainerContext => false;
 
         public virtual CXChildVisitResult VisitResult { get; } = CXChildVisitResult.CXChildVisit_Continue;
 
         public unsafe TResult Visit(CppModelContext context, CXCursor cursor, CXCursor parent)
         {
             Context = context;
-            if (CreateContainerContext)
-            {
-                Container = Builder.GetOrCreateDeclContainer(parent);
-            }
             return VisitCore(cursor, parent);
         }
 

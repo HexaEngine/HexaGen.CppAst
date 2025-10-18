@@ -1,6 +1,7 @@
 ﻿namespace HexaGen.CppAst.Parsing
 {
     using ClangSharp.Interop;
+    using HexaGen.CppAst.Collections;
     using HexaGen.CppAst.Model.Declarations;
     using HexaGen.CppAst.Model.Templates;
     using HexaGen.CppAst.Model.Types;
@@ -118,7 +119,7 @@
 
                 case CXTypeKind.CXType_ObjCTypeParam:
                     {
-                        CppTemplateParameterType templateArgType = TryToCreateTemplateParametersObjC(cursor);
+                        CppTemplateParameterType templateArgType = context.TryToCreateTemplateParametersObjC(cursor);
 
                         // Record that a typedef is using a template parameter type
                         // which will require to re-parent the typedef to the Obj-C interface it belongs to
@@ -234,6 +235,54 @@
             }
 
             return templateCppTypes;
+        }
+
+        public unsafe CppClass VisitClassDecl(CXCursor cursor)
+        {
+            var cppStruct = this.context.GetOrCreateDeclContainer<CppClass>(cursor, out var context);
+            if (cursor.IsCursorDefinition(cppStruct) && !context.IsChildrenVisited)
+            {
+                ParseAttributes(cursor, cppStruct, false);
+                cppStruct.IsDefinition = true;
+                cppStruct.SizeOf = (int)cursor.Type.SizeOf;
+                cppStruct.AlignOf = (int)cursor.Type.AlignOf;
+                context.IsChildrenVisited = true;
+                var saveCurrentClassBeingVisited = this.context.CurrentClassBeingVisited;
+                this.context.CurrentClassBeingVisited = cppStruct;
+                cursor.VisitChildren(VisitMember, default);
+
+                if (cppStruct.Properties.Count > 0)
+                {
+                    foreach (var prop in cppStruct.Properties)
+                    {
+                        prop.Getter = cppStruct.Functions.FindByName(prop.GetterName);
+                        prop.Setter = cppStruct.Functions.FindByName(prop.SetterName);
+                    }
+                }
+
+                cppStruct.AssignSourceSpan(cursor);
+
+                this.context.CurrentClassBeingVisited = saveCurrentClassBeingVisited;
+            }
+            return cppStruct;
+        }
+
+        private CppType VisitElaboratedDecl(CXCursor cursor, CXType type, CXCursor parent)
+        {
+            var key = context.GetCursorKey(cursor);
+            if (TypedefResolver.TryResolve(key, out var typeRef))
+            {
+                return typeRef;
+            }
+
+            // If the type has been already declared, return it immediately.
+            if (Containers.TryGetValue(key, out var containerContext))
+            {
+                return (CppType)containerContext.Container;
+            }
+
+            // TODO: Pseudo fix, we are not supposed to land here, as the TryGet before should resolve an existing type already declared (but not necessarily defined)
+            return GetCppType(type.CanonicalType.Declaration, type.CanonicalType, parent);
         }
     }
 }

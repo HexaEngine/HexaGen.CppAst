@@ -13,7 +13,7 @@
 
         protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var parentContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent).DeclarationContainer;
+            var parentContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent).DeclarationContainer;
             CppEnum cppEnum = new(CXUtil.GetCursorSpelling(cursor))
             {
                 IsAnonymous = cursor.IsAnonymous,

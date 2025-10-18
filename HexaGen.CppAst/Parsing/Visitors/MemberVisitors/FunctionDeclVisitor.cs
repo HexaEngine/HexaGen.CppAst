@@ -23,7 +23,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent);
+            var contextContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent);
             var container = contextContainer.DeclarationContainer;
 
             if (container == null)

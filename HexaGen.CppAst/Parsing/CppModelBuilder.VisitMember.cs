@@ -19,15 +19,15 @@
                 {
                     if (!ParseSystemIncludes) return CXChildVisitResult.CXChildVisit_Continue;
 
-                    rootContainerContext = systemRootContainerContext;
+                    context.CurrentRootContainer = context.SystemRootContainerContext;
                 }
                 else
                 {
-                    rootContainerContext = userRootContainerContext;
+                    context.CurrentRootContainer = context.UserRootContainerContext;
                 }
             }
 
-            if (rootContainerContext is null)
+            if (context.CurrentRootContainer is null)
             {
                 RootCompilation.Diagnostics.Error($"Unexpected error with cursor location. Cannot determine Root Compilation context.");
                 return CXChildVisitResult.CXChildVisit_Continue;

@@ -10,7 +10,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 
         protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var ns = Builder.GetOrCreateDeclarationContainer<CppNamespace>(cursor, out var context);
+            var ns = Context.GetOrCreateDeclContainer<CppNamespace>(cursor, out var context);
             Builder.ParseAttributes(cursor, ns, false);
             cursor.VisitChildren(Builder.VisitMember, default);
             return ns;

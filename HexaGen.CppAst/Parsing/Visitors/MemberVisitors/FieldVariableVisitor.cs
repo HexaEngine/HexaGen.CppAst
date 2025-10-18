@@ -2,6 +2,7 @@ using ClangSharp.Interop;
 using HexaGen.CppAst.Model;
 using HexaGen.CppAst.Model.Declarations;
 using HexaGen.CppAst.Utilities;
+using System;
 
 namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 {
@@ -11,7 +12,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent);
+            var containerContext = Context.GetOrCreateDeclContainer(parent);
             var fieldName = CXUtil.GetCursorSpelling(cursor);
             var type = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor);
 
@@ -38,7 +39,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
                     BitOffset = cursor.OffsetOfField,
                 };
                 containerContext.DeclarationContainer.Fields.Add(cppField);
-                Context.Builder.ParseAttributes(cursor, cppField, true);
+                Builder.ParseAttributes(cursor, cppField, true);
 
                 if (cursor.Kind == CXCursorKind.CXCursor_VarDecl)
                 {

@@ -1,15 +1,12 @@
 ﻿namespace HexaGen.CppAst.Parsing
 {
     using ClangSharp.Interop;
-    using HexaGen.CppAst.Collections;
     using HexaGen.CppAst.Model.Attributes;
     using HexaGen.CppAst.Model.Declarations;
     using HexaGen.CppAst.Model.Interfaces;
     using HexaGen.CppAst.Model.Types;
     using HexaGen.CppAst.Utilities;
     using System.Collections.Generic;
-    using System.Reflection.Metadata;
-    using System.Runtime.InteropServices;
 
     public unsafe partial class CppModelBuilder
     {
@@ -116,6 +113,7 @@
             // Low performance tokens handle here
             if (!ParseTokenAttributeEnabled) return;
 
+            var globalDeclarationContainer = context.GlobalDeclarationContainer;
             List<CppAttribute> attributes = [];
             // Parse attributes online
             if (needOnlineSeek)
@@ -123,18 +121,18 @@
                 bool hasOnlineAttribute = CppTokenUtil.TryToSeekOnlineAttributes(cursor, out var onLineRange);
                 if (hasOnlineAttribute)
                 {
-                    CppTokenUtil.ParseAttributesInRange((CppGlobalDeclarationContainer)rootContainerContext.Container, cursor.TranslationUnit, onLineRange, ref attributes);
+                    CppTokenUtil.ParseAttributesInRange(globalDeclarationContainer, cursor.TranslationUnit, onLineRange, ref attributes);
                 }
             }
 
             // Parse attributes contains in cursor
             if (attrContainer is CppFunction func)
             {
-                CppTokenUtil.ParseFunctionAttributes((CppGlobalDeclarationContainer)rootContainerContext.Container, cursor, func.Name, ref attributes);
+                CppTokenUtil.ParseFunctionAttributes(globalDeclarationContainer, cursor, func.Name, ref attributes);
             }
             else
             {
-                CppTokenUtil.ParseCursorAttributs((CppGlobalDeclarationContainer)rootContainerContext.Container, cursor, ref attributes);
+                CppTokenUtil.ParseCursorAttributs(globalDeclarationContainer, cursor, ref attributes);
             }
 
             attrContainer.TokenAttributes.AddRange(attributes);

@@ -17,13 +17,13 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var fulltypeDefName = Builder.GetCursorKey(cursor);
+            var fulltypeDefName = Context.GetCursorKey(cursor);
             if (TypedefResolver.TryResolve(fulltypeDefName, out var type))
             {
                 return type;
             }
 
-            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent);
+            var contextContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent);
 
             var kind = cursor.Kind;
 

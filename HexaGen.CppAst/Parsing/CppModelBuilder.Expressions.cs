@@ -6,7 +6,7 @@
 
     public unsafe partial class CppModelBuilder
     {
-        public static CppExpression? VisitExpression(CXCursor cursor, void* data)
+        public static CppExpression? VisitExpression(CXCursor cursor)
         {
             CppExpression? expr = null;
             bool visitChildren = false;
@@ -62,7 +62,7 @@
                 cursor.VisitChildren(static (listCursor, initListCursor, clientData) =>
                 {
                     CppExpression expr = DGCHandle<CppExpression>.ObjFrom(clientData);
-                    var item = VisitExpression(listCursor, clientData);
+                    var item = VisitExpression(listCursor);
                     if (item != null)
                     {
                         expr.AddArgument(item);

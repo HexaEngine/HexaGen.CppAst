@@ -27,7 +27,7 @@
 
         protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent)
         {
-            ICppDeclarationContainer parentContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent).DeclarationContainer;
+            ICppDeclarationContainer parentContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent).DeclarationContainer;
 
             CppClass cppClass = new(CXUtil.GetCursorSpelling(cursor));
             parentContainer.Classes.Add(cppClass);
@@ -74,7 +74,7 @@
                             return CXChildVisitResult.CXChildVisit_Continue;
                         }, (CXClientData)Unsafe.AsPointer(ref parentCursor));
 
-                        var parentClassContainer = Builder.GetOrCreateDeclContainer(parentCursor).Container;
+                        var parentClassContainer = Context.GetOrCreateDeclContainer(parentCursor).Container;
                         var targetClass = (CppClass)parentClassContainer;
                         cppClass.ObjCCategoryName = cppClass.Name;
                         cppClass.Name = targetClass.Name;
@@ -92,7 +92,7 @@
                 || cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
             {
                 //Try to generate template class first
-                cppClass.SpecializedTemplate = (CppClass)Builder.GetOrCreateDeclContainer(cursor.SpecializedCursorTemplate).Container;
+                cppClass.SpecializedTemplate = (CppClass)Context.GetOrCreateDeclContainer(cursor.SpecializedCursorTemplate).Container;
                 if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
                 {
                     cppClass.TemplateKind = CppTemplateKind.PartialTemplateClass;
@@ -167,15 +167,16 @@
 
         public unsafe void AddTemplateParameters(CXCursor cursor, CppClass cppClass)
         {
-            var context = (cppClass, Builder);
+            var ctx = (cppClass, Builder);
             cursor.VisitChildren(static (childCursor, classCursor, clientData) =>
             {
-                var (cppClass, Builder) = Unsafe.AsRef<(CppClass, CppModelBuilder)>(clientData);
+                var (cppClass, context) = Unsafe.AsRef<(CppClass, CppModelContext)>(clientData);
+                var builder = context.Builder;
 
                 if (cppClass.ClassKind == CppClassKind.ObjCInterface ||
                     cppClass.ClassKind == CppClassKind.ObjCProtocol)
                 {
-                    var param = Builder.TryToCreateTemplateParametersObjC(childCursor);
+                    var param = context.TryToCreateTemplateParametersObjC(childCursor);
                     if (param != null)
                     {
                         cppClass.TemplateKind = CppTemplateKind.ObjCGenericClass;
@@ -184,7 +185,7 @@
                 }
                 else
                 {
-                    var param = Builder.TryToCreateTemplateParameters(childCursor);
+                    var param = builder.TryToCreateTemplateParameters(childCursor);
                     if (param != null)
                     {
                         cppClass.TemplateKind = CppTemplateKind.TemplateClass;
@@ -193,7 +194,7 @@
                 }
 
                 return CXChildVisitResult.CXChildVisit_Continue;
-            }, (CXClientData)Unsafe.AsPointer(ref context));
+            }, (CXClientData)Unsafe.AsPointer(ref ctx));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 
         protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent);
+            var containerContext = Context.GetOrCreateDeclContainer(parent);
             var cppEnum = (CppEnum)containerContext.Container;
             var enumItem = new CppEnumItem(CXUtil.GetCursorSpelling(cursor), cursor.EnumConstantDeclValue);
             Builder.ParseAttributes(cursor, enumItem, true);

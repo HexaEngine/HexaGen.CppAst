@@ -14,7 +14,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent);
+            var containerContext = Context.GetOrCreateDeclContainer(parent);
             var cppEnum = (CppEnum)containerContext.Container;
             cppEnum.Attributes.Add(new CppAttribute("flag_enum", AttributeKind.ObjectiveCAttribute));
             return null;
