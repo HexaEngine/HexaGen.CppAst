@@ -1,14 +1,11 @@
 using System.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HexaGen.CppAst.AttributeUtils
 {
     public class MetaAttribute
     {
         public string FeatureName;
-        public Dictionary<string, object> ArgumentMap = new Dictionary<string, object>();
+        public Dictionary<string, object> ArgumentMap = [];
 
         public override string ToString()
         {
@@ -18,7 +15,7 @@ namespace HexaGen.CppAst.AttributeUtils
             {
                 builder.Append($"{kvp.Key}: {kvp.Value}, ");
             }
-            builder.Append("}");
+            builder.Append('}');
             return builder.ToString();
         }
 
@@ -48,21 +45,21 @@ namespace HexaGen.CppAst.AttributeUtils
 
     public class MetaAttributeMap
     {
-        public List<MetaAttribute> MetaList { get; private set; } = new List<MetaAttribute>();
+        private readonly List<MetaAttribute> list = [];
 
         public bool IsNull
         {
             get
             {
-                return MetaList.Count == 0;
+                return list.Count == 0;
             }
         }
 
         public object QueryArgument(string argName)
         {
-            if (MetaList.Count == 0) return null;
+            if (list.Count == 0) return null;
 
-            foreach (var argMap in MetaList)
+            foreach (var argMap in list)
             {
                 if (argMap.ArgumentMap.ContainsKey(argName))
                 {
@@ -131,7 +128,7 @@ namespace HexaGen.CppAst.AttributeUtils
                 return;
             }
 
-            foreach (MetaAttribute meta in MetaList)
+            foreach (MetaAttribute meta in list)
             {
                 foreach (KeyValuePair<string, object> kvp in meta.ArgumentMap)
                 {
@@ -141,7 +138,7 @@ namespace HexaGen.CppAst.AttributeUtils
 
             if (metaAttr.ArgumentMap.Count > 0)
             {
-                MetaList.Add(metaAttr);
+                list.Add(metaAttr);
             }
         }
     }
@@ -199,7 +196,7 @@ namespace HexaGen.CppAst.AttributeUtils
                 arguments = arrVal[1];
             }
 
-            MetaAttribute attribute = new MetaAttribute();
+            MetaAttribute attribute = new();
             attribute.FeatureName = feature;
             bool parseSuc = NamedParameterParser.ParseNamedParameters(arguments, attribute.ArgumentMap, out errorMessage);
             if (parseSuc)
@@ -215,7 +212,7 @@ namespace HexaGen.CppAst.AttributeUtils
         public static MetaAttribute ParseMetaStringFor(string meta, out string errorMessage)
         {
             errorMessage = "";
-            MetaAttribute attribute = new MetaAttribute();
+            MetaAttribute attribute = new();
             bool parseSuc = NamedParameterParser.ParseNamedParameters(meta, attribute.ArgumentMap, out errorMessage);
             if (parseSuc)
             {

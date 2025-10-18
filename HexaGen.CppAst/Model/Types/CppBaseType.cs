@@ -45,7 +45,7 @@ namespace HexaGen.CppAst.Model.Types
             var builder = new StringBuilder();
             if (Visibility != CppVisibility.Default && Visibility != CppVisibility.Public)
             {
-                builder.Append(Visibility.ToString().ToLowerInvariant()).Append(" ");
+                builder.Append(Visibility.ToString().ToLowerInvariant()).Append(' ');
             }
 
             if (IsVirtual)
@@ -58,7 +58,7 @@ namespace HexaGen.CppAst.Model.Types
             var cls = Type as CppClass;
             if (cls != null && cls.TemplateKind != CppTemplateKind.NormalClass)
             {
-                builder.Append("<");
+                builder.Append('<');
 
                 if (cls.TemplateKind == CppTemplateKind.TemplateSpecializedClass)
                 {
@@ -77,7 +77,7 @@ namespace HexaGen.CppAst.Model.Types
                     }
                 }
 
-                builder.Append(">");
+                builder.Append('>');
             }
             return builder.ToString();
         }

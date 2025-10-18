@@ -22,7 +22,7 @@ public sealed class CppProperty : CppDeclaration, ICppMember, ICppAttributeConta
     {
         Type = type ?? throw new ArgumentNullException(nameof(type));
         Name = name;
-        Attributes = new List<CppAttribute>();
+        Attributes = [];
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public sealed class CppProperty : CppDeclaration, ICppMember, ICppAttributeConta
     public List<CppAttribute> Attributes { get; }
 
     [Obsolete("TokenAttributes is deprecated. please use system attributes and annotate attributes")]
-    public List<CppAttribute> TokenAttributes { get; } = new();
+    public List<CppAttribute> TokenAttributes { get; } = [];
 
     public MetaAttributeMap MetaAttributes { get; private set; } = new MetaAttributeMap();
 
@@ -69,7 +69,7 @@ public sealed class CppProperty : CppDeclaration, ICppMember, ICppAttributeConta
         var builder = new StringBuilder();
 
         builder.Append(Type.GetDisplayName());
-        builder.Append(" ");
+        builder.Append(' ');
         builder.Append(Name);
         return builder.ToString();
     }

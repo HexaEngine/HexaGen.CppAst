@@ -124,10 +124,10 @@ namespace HexaGen.CppAst.Model.Metadata
             for (var index = 0; index < Arguments.Count; index++)
             {
                 var argument = Arguments[index];
-                builder.Append(" ");
+                builder.Append(' ');
                 builder.Append(argument);
             }
-            builder.Append(" ");
+            builder.Append(' ');
         }
     }
 
@@ -248,7 +248,7 @@ namespace HexaGen.CppAst.Model.Metadata
         {
             base.ToString(builder);
             builder.Append(ParamName);
-            builder.Append(" ");
+            builder.Append(' ');
             ChildrenToString(builder);
         }
     }
@@ -286,7 +286,7 @@ namespace HexaGen.CppAst.Model.Metadata
         {
             base.ToString(builder);
             builder.Append(ParamName);
-            builder.Append(" ");
+            builder.Append(' ');
             ChildrenToString(builder);
         }
     }
@@ -418,7 +418,7 @@ namespace HexaGen.CppAst.Model.Metadata
     {
         public CppCommentHtmlStartTag() : base(CppCommentKind.HtmlStartTag)
         {
-            Attributes = new List<KeyValuePair<string, string>>();
+            Attributes = [];
         }
 
         /// <summary>
@@ -433,23 +433,23 @@ namespace HexaGen.CppAst.Model.Metadata
 
         protected internal override void ToString(StringBuilder builder)
         {
-            builder.Append("<");
+            builder.Append('<');
             builder.Append(TagName);
 
             foreach (var keyValuePair in Attributes)
             {
-                builder.Append(" ");
+                builder.Append(' ');
                 builder.Append(keyValuePair.Key);
                 builder.Append("=\"");
                 builder.Append(keyValuePair.Value);
-                builder.Append("\"");
+                builder.Append('"');
             }
 
             if (IsSelfClosing)
             {
                 builder.Append(" /");
             }
-            builder.Append(">");
+            builder.Append('>');
         }
     }
 
@@ -466,7 +466,7 @@ namespace HexaGen.CppAst.Model.Metadata
         {
             builder.Append("</");
             builder.Append(TagName);
-            builder.Append(">");
+            builder.Append('>');
         }
     }
 }

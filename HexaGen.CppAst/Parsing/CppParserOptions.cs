@@ -18,19 +18,19 @@ namespace HexaGen.CppAst.Parsing
         public CppParserOptions()
         {
             ParserKind = CppParserKind.Cpp;
-            SystemIncludeFolders = new List<string>();
-            IncludeFolders = new List<string>();
+            SystemIncludeFolders = [];
+            IncludeFolders = [];
 
             //Add a default macro here for CppAst.Net
-            Defines = new List<string>() { 
+            Defines = [ 
                 "__cppast_run__",                                     //Help us for identify the CppAst.Net handler
                 @"__cppast_impl(...)=__attribute__((annotate(#__VA_ARGS__)))",          //Help us for use annotate attribute convenience
                 @"__cppast(...)=__cppast_impl(__VA_ARGS__)",                         //Add a macro wrapper here, so the argument with macro can be handle right for compiler.
-            };
-            AdditionalArguments = new List<string>()
-            {
+            ];
+            AdditionalArguments =
+            [
                 "-Wno-pragma-once-outside-header"
-            };
+            ];
             AutoSquashTypedef = true;
             ParseMacros = false;
             ParseComments = true;

@@ -24,7 +24,7 @@ namespace HexaGen.CppAst.Collections
         public CppContainerList(ICppContainer container)
         {
             Container = container ?? throw new ArgumentNullException(nameof(container));
-            _elements = new List<TElement>();
+            _elements = [];
         }
 
         /// <summary>

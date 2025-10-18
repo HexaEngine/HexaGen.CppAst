@@ -15,7 +15,7 @@ namespace HexaGen.CppAst.Diagnostics
 
         public CppDiagnosticBag()
         {
-            _messages = new List<CppDiagnosticMessage>();
+            _messages = [];
         }
 
         public void Clear()

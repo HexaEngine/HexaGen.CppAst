@@ -16,7 +16,7 @@ public class CppGenericType : CppType
     public CppGenericType(CppType baseType) : base(CppTypeKind.GenericType)
     {
         BaseType = baseType;
-        GenericArguments = new List<CppType>();
+        GenericArguments = [];
     }
     
     public CppType BaseType { get; set; }
@@ -43,7 +43,7 @@ public class CppGenericType : CppType
                 }
                 builder.Append(GenericArguments[i].GetDisplayName());
             }
-            builder.Append(">");
+            builder.Append('>');
         }
         return builder.ToString();
     }

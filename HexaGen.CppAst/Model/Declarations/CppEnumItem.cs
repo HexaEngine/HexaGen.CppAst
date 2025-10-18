@@ -41,10 +41,10 @@ namespace HexaGen.CppAst.Model.Declarations
         public CppExpression ValueExpression { get; set; }
 
         /// <inheritdoc />
-        public List<CppAttribute> Attributes { get; } = new List<CppAttribute>();
+        public List<CppAttribute> Attributes { get; } = [];
 
         [Obsolete("TokenAttributes is deprecated. please use system attributes and annotate attributes")]
-        public List<CppAttribute> TokenAttributes { get; } = new List<CppAttribute>();
+        public List<CppAttribute> TokenAttributes { get; } = [];
 
         public MetaAttributeMap MetaAttributes { get; private set; } = new MetaAttributeMap();
 

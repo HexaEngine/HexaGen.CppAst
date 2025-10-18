@@ -58,7 +58,7 @@ namespace HexaGen.CppAst.Model.Declarations
         {
             var builder = new StringBuilder();
             builder.Append(ReturnType.GetDisplayName());
-            builder.Append(" ");
+            builder.Append(' ');
             // Don't complicate with a virtual methods, hardcode derived cases here
             if (TypeKind == CppTypeKind.ObjCBlockFunction)
             {
@@ -75,7 +75,7 @@ namespace HexaGen.CppAst.Model.Declarations
                 builder.Append(param);
             }
 
-            builder.Append(")");
+            builder.Append(')');
             return builder.ToString();
         }
     }

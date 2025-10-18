@@ -38,7 +38,7 @@ namespace HexaGen.CppAst.Model.Expressions
         public void AddArgument(CppExpression arg)
         {
             if (arg == null) throw new ArgumentNullException(nameof(arg));
-            if (Arguments == null) Arguments = new List<CppExpression>();
+            if (Arguments == null) Arguments = [];
             Arguments.Add(arg);
         }
 
@@ -114,9 +114,9 @@ namespace HexaGen.CppAst.Model.Expressions
         public override string ToString()
         {
             var builder = new StringBuilder();
-            builder.Append("{");
+            builder.Append('{');
             ArgumentsSeparatedByCommaToString(builder);
-            builder.Append("}");
+            builder.Append('}');
             return builder.ToString();
         }
     }
@@ -144,9 +144,9 @@ namespace HexaGen.CppAst.Model.Expressions
                 builder.Append(Arguments[0]);
             }
 
-            builder.Append(" ");
+            builder.Append(' ');
             builder.Append(Operator);
-            builder.Append(" ");
+            builder.Append(' ');
 
             if (Arguments != null && Arguments.Count > 1)
             {
@@ -196,9 +196,9 @@ namespace HexaGen.CppAst.Model.Expressions
         public override string ToString()
         {
             var builder = new StringBuilder();
-            builder.Append("(");
+            builder.Append('(');
             ArgumentsSeparatedByCommaToString(builder);
-            builder.Append(")");
+            builder.Append(')');
             return builder.ToString();
         }
     }

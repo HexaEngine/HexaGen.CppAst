@@ -26,8 +26,8 @@ namespace HexaGen.CppAst.Model.Declarations
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             ElementType = type;
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            Attributes = [];
+            TokenAttributes = [];
             MetaAttributes = new MetaAttributeMap();
         }
 

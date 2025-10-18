@@ -27,7 +27,7 @@ namespace HexaGen.CppAst.Model.Declarations
         public CppClass(string name) : base(CppTypeKind.StructOrClass)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            BaseTypes = new List<CppBaseType>();
+            BaseTypes = [];
             Fields = new CppContainerList<CppField>(this);
             Constructors = new CppContainerList<CppFunction>(this);
             Destructors = new CppContainerList<CppFunction>(this);
@@ -36,11 +36,11 @@ namespace HexaGen.CppAst.Model.Declarations
             Classes = new CppContainerList<CppClass>(this);
             Typedefs = new CppContainerList<CppTypedef>(this);
             TemplateParameters = new CppContainerList<CppType>(this);
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
-            ObjCImplementedProtocols = new List<CppClass>();
+            Attributes = [];
+            TokenAttributes = [];
+            ObjCImplementedProtocols = [];
             Properties = new CppContainerList<CppProperty>(this);
-            ObjCCategories = new List<CppClass>();
+            ObjCCategories = [];
             ObjCCategoryName = string.Empty;
         }
 
@@ -184,7 +184,7 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <inheritdoc />
         public CppContainerList<CppType> TemplateParameters { get; }
 
-        public List<CppTemplateArgument> TemplateSpecializedArguments { get; } = new List<CppTemplateArgument>();
+        public List<CppTemplateArgument> TemplateSpecializedArguments { get; } = [];
 
         /// <summary>
         /// Gets the specialized class template of this instance.
@@ -248,7 +248,7 @@ namespace HexaGen.CppAst.Model.Declarations
             //Add template arguments here
             if (TemplateKind != CppTemplateKind.NormalClass)
             {
-                builder.Append("<");
+                builder.Append('<');
 
                 if (TemplateKind == CppTemplateKind.TemplateSpecializedClass)
                 {
@@ -267,7 +267,7 @@ namespace HexaGen.CppAst.Model.Declarations
                     }
                 }
 
-                builder.Append(">");
+                builder.Append('>');
             }
 
             if (BaseTypes.Count > 0)
@@ -295,7 +295,7 @@ namespace HexaGen.CppAst.Model.Declarations
                     if (i > 0) builder.Append(", ");
                     builder.Append(protocol.Name);
                 }
-                builder.Append(">");
+                builder.Append('>');
             }
 
             return builder.ToString();

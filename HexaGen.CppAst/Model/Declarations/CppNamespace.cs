@@ -30,8 +30,8 @@ namespace HexaGen.CppAst.Model.Declarations
             Classes = new CppContainerList<CppClass>(this);
             Typedefs = new CppContainerList<CppTypedef>(this);
             Namespaces = new CppContainerList<CppNamespace>(this);
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            Attributes = [];
+            TokenAttributes = [];
             Properties = new CppContainerList<CppProperty>(this);
         }
 

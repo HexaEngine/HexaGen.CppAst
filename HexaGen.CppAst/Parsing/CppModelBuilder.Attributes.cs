@@ -35,9 +35,7 @@
                             CppAttribute attribute = new("annotate", AttributeKind.AnnotateAttribute)
                             {
                                 Span = sourceSpan,
-                                Scope = "",
                                 Arguments = meta,
-                                IsVariadic = false,
                             };
 
                             attributes.Add(attribute);
@@ -50,9 +48,6 @@
                             CppAttribute attribute = new("alignas", AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
-                                Scope = "",
-                                Arguments = "",
-                                IsVariadic = false,
                             };
 
                             attributes.Add(attribute);
@@ -67,9 +62,6 @@
                             CppAttribute attribute = new(attrKindSpelling, AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
-                                Scope = "",
-                                Arguments = "",
-                                IsVariadic = false,
                             };
 
                             attributes.Add(attribute);
@@ -85,9 +77,6 @@
                             CppAttribute attribute = new(attrKindSpelling, AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
-                                Scope = "",
-                                Arguments = "",
-                                IsVariadic = false,
                             };
 
                             attributes.Add(attribute);
@@ -132,7 +121,7 @@
             }
             else
             {
-                CppTokenUtil.ParseCursorAttributs(globalDeclarationContainer, cursor, ref attributes);
+                CppTokenUtil.ParseCursorAttributes(globalDeclarationContainer, cursor, ref attributes);
             }
 
             attrContainer.TokenAttributes.AddRange(attributes);

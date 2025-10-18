@@ -23,8 +23,8 @@ namespace HexaGen.CppAst.Model.Declarations
         {
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Name = name;
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            Attributes = [];
+            TokenAttributes = [];
         }
 
         /// <inheritdoc />
@@ -96,17 +96,17 @@ namespace HexaGen.CppAst.Model.Declarations
             if (Visibility != CppVisibility.Default)
             {
                 builder.Append(Visibility.ToString().ToLowerInvariant());
-                builder.Append(" ");
+                builder.Append(' ');
             }
 
             if (StorageQualifier != CppStorageQualifier.None)
             {
                 builder.Append(StorageQualifier.ToString().ToLowerInvariant());
-                builder.Append(" ");
+                builder.Append(' ');
             }
 
             builder.Append(Type.GetDisplayName());
-            builder.Append(" ");
+            builder.Append(' ');
             builder.Append(Name);
 
             if (InitExpression != null)

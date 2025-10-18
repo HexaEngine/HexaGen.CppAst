@@ -3,7 +3,6 @@
 // See license.txt file in the project root for full license information.
 
 using HexaGen.CppAst.Model.Interfaces;
-using System.Collections.Generic;
 
 namespace HexaGen.CppAst.Utilities
 {

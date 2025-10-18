@@ -2,7 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
 using System.Text;
 
 namespace HexaGen.CppAst.Model.Attributes
@@ -21,7 +20,7 @@ namespace HexaGen.CppAst.Model.Attributes
         /// <summary>
         /// Gets or sets the scope of this attribute
         /// </summary>
-        public string Scope { get; set; }
+        public string Scope { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets the attribute name.
@@ -31,7 +30,7 @@ namespace HexaGen.CppAst.Model.Attributes
         /// <summary>
         /// Gets the attribute arguments
         /// </summary>
-        public string Arguments { get; set; }
+        public string Arguments { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets a boolean indicating whether this attribute is variadic
@@ -43,14 +42,14 @@ namespace HexaGen.CppAst.Model.Attributes
         /// <inheritdoc />
         public override string ToString()
         {
-            var builder = new StringBuilder();
+            StringBuilder builder = new();
 
             ////builder.Append("[[");
 
             builder.Append(Name);
             if (Arguments != null)
             {
-                builder.Append("(").Append(Arguments).Append(")");
+                builder.Append('(').Append(Arguments).Append(')');
             }
 
             if (IsVariadic)

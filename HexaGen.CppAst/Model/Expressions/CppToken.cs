@@ -48,7 +48,7 @@ namespace HexaGen.CppAst.Model.Expressions
                 // If previous token and new token are identifiers/keyword, we need a space between them
                 if (previousKind.IsIdentifierOrKeyword() && token.Kind.IsIdentifierOrKeyword())
                 {
-                    builder.Append(" ");
+                    builder.Append(' ');
                 }
                 builder.Append(token.Text);
                 previousKind = token.Kind;

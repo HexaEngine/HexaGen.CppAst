@@ -27,8 +27,8 @@ namespace HexaGen.CppAst.Model.Declarations
         {
             Name = name;
             Items = new CppContainerList<CppEnumItem>(this);
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            Attributes = [];
+            TokenAttributes = [];
         }
 
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace HexaGen.CppAst.Model.Declarations
             if (Visibility != CppVisibility.Default)
             {
                 builder.Append(Visibility.ToString().ToLowerInvariant());
-                builder.Append(" ");
+                builder.Append(' ');
             }
 
             builder.Append("enum ");

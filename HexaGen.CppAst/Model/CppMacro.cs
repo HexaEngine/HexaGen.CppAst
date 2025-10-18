@@ -22,7 +22,7 @@ namespace HexaGen.CppAst.Model
         public CppMacro(string name)
         {
             Name = name;
-            Tokens = new List<CppToken>();
+            Tokens = [];
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace HexaGen.CppAst.Model
             builder.Append(Name);
             if (Parameters != null)
             {
-                builder.Append("(");
+                builder.Append('(');
                 for (var i = 0; i < Parameters.Count; i++)
                 {
                     var parameter = Parameters[i];
@@ -70,7 +70,7 @@ namespace HexaGen.CppAst.Model
                     builder.Append(parameter);
                 }
 
-                builder.Append(")");
+                builder.Append(')');
             }
 
             builder.Append(" = ").Append(Value);
