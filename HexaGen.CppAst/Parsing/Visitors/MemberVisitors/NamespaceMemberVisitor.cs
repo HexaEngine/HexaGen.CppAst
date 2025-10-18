@@ -4,7 +4,7 @@ using HexaGen.CppAst.Model.Declarations;
 
 namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 {
-    public class NamespaceVisitor : MemberVisitor
+    public class NamespaceMemberVisitor : MemberVisitor
     {
         public override IEnumerable<CXCursorKind> Kinds { get; } = [CXCursorKind.CXCursor_Namespace];
 

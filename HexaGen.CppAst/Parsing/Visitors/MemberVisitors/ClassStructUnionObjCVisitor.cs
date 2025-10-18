@@ -22,7 +22,7 @@
         {
             bool isAnonymous = cursor.IsAnonymous;
             var cppClass = Builder.VisitClassDecl(cursor, data);
-            var containerContext = Builder.GetOrCreateDeclarationContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
             // Empty struct/class/union declaration are considered as fields
             if (isAnonymous)
             {

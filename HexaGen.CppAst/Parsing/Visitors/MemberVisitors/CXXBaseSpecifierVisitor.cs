@@ -14,7 +14,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var cppClass = (CppClass)Builder.GetOrCreateDeclarationContainer(parent, data).Container;
+            var cppClass = (CppClass)Builder.GetOrCreateDeclContainer(parent, data).Container;
             var baseType = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor, data);
             var cppBaseType = new CppBaseType(baseType)
             {

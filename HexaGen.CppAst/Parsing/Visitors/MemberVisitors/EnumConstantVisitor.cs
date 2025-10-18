@@ -11,12 +11,12 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
 
         protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var containerContext = Builder.GetOrCreateDeclarationContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
             var cppEnum = (CppEnum)containerContext.Container;
             var enumItem = new CppEnumItem(CXUtil.GetCursorSpelling(cursor), cursor.EnumConstantDeclValue);
             Builder.ParseAttributes(cursor, enumItem, true);
 
-            Builder.VisitInitValue(cursor, data, out var enumItemExpression, out var enumValue);
+            Builder.VisitInitValue(cursor, out var enumItemExpression, out var enumValue);
             enumItem.ValueExpression = enumItemExpression;
 
             cppEnum.Items.Add(enumItem);

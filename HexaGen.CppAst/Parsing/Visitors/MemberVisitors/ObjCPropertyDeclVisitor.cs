@@ -14,7 +14,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var containerContext = Builder.GetOrCreateDeclarationContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
             var propertyName = CXUtil.GetCursorSpelling(cursor);
             var type = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor, data);
 

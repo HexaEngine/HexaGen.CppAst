@@ -15,10 +15,10 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var objCContainer = Builder.GetOrCreateDeclarationContainer(parent, data).Container;
+            var objCContainer = Builder.GetOrCreateDeclContainer(parent, data).Container;
             if (objCContainer is CppClass cppClass && cppClass.ClassKind != CppClassKind.ObjCInterfaceCategory)
             {
-                var referencedType = (CppClass)Builder.GetOrCreateDeclarationContainer(cursor.Referenced, data).Container;
+                var referencedType = (CppClass)Builder.GetOrCreateDeclContainer(cursor.Referenced, data).Container;
                 if (cursor.Kind == CXCursorKind.CXCursor_ObjCClassRef)
                 {
                     var cppBaseType = new CppBaseType(referencedType);

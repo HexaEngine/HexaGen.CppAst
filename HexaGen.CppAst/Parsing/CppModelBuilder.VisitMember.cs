@@ -3,7 +3,6 @@
     using ClangSharp.Interop;
     using HexaGen.CppAst.Model;
     using HexaGen.CppAst.Model.Interfaces;
-    using HexaGen.CppAst.Parsing.Visitors;
 
     public unsafe partial class CppModelBuilder
     {
@@ -20,15 +19,15 @@
                 {
                     if (!ParseSystemIncludes) return CXChildVisitResult.CXChildVisit_Continue;
 
-                    _rootContainerContext = _systemRootContainerContext;
+                    rootContainerContext = systemRootContainerContext;
                 }
                 else
                 {
-                    _rootContainerContext = _userRootContainerContext;
+                    rootContainerContext = userRootContainerContext;
                 }
             }
 
-            if (_rootContainerContext is null)
+            if (rootContainerContext is null)
             {
                 RootCompilation.Diagnostics.Error($"Unexpected error with cursor location. Cannot determine Root Compilation context.");
                 return CXChildVisitResult.CXChildVisit_Continue;

@@ -10,9 +10,10 @@ using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Metadata;
 using HexaGen.CppAst.Model.Templates;
 using HexaGen.CppAst.Model.Types;
+using HexaGen.CppAst.Parsing.Visitors.MemberVisitors;
 using HexaGen.CppAst.Utilities;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace HexaGen.CppAst.Parsing
 {
@@ -22,24 +23,21 @@ namespace HexaGen.CppAst.Parsing
     public unsafe partial class CppModelBuilder : CompilationLoggerBase
     {
         private readonly CppModelContext context;
-        private readonly CppContainerContext _userRootContainerContext;
-        private readonly CppContainerContext _systemRootContainerContext;
-        private CppContainerContext _rootContainerContext = null!;
-        private readonly Dictionary<CursorKey, CppContainerContext> _containers;
+        private readonly CppContainerContext userRootContainerContext;
+        private readonly CppContainerContext systemRootContainerContext;
+        private CppContainerContext rootContainerContext = null!;
+        private readonly Dictionary<CursorKey, CppContainerContext> containers;
         private readonly TypedefResolver typedefResolver = new();
-        private readonly Dictionary<CursorKey, CppTemplateParameterType> _objCTemplateParameterTypes;
-        private CursorKey _currentTypedefKey;
-        private readonly Dictionary<CppTemplateParameterType, HashSet<CursorKey>> _mapTemplateParameterTypeToTypedefKeys;
+        private readonly Dictionary<CursorKey, CppTemplateParameterType> objCTemplateParameterTypes;
 
         public CppModelBuilder()
         {
-            _containers = [];
-            _mapTemplateParameterTypeToTypedefKeys = [];
+            containers = [];
             RootCompilation = new();
-            _objCTemplateParameterTypes = [];
-            _userRootContainerContext = new(RootCompilation, CppContainerContextType.User);
-            _systemRootContainerContext = new(RootCompilation.System, CppContainerContextType.System);
-            context = new CppModelContext(_containers, RootCompilation, this);
+            objCTemplateParameterTypes = [];
+            userRootContainerContext = new(RootCompilation, CppContainerContextType.User, CppVisibility.Default);
+            systemRootContainerContext = new(RootCompilation.System, CppContainerContextType.System, CppVisibility.Default);
+            context = new CppModelContext(containers, RootCompilation, this);
         }
 
         public bool AutoSquashTypedef { get; set; }
@@ -52,208 +50,32 @@ namespace HexaGen.CppAst.Parsing
 
         public override CppCompilation RootCompilation { get; }
 
-        public CppContainerContext CurrentRootContainer => _rootContainerContext;
+        public CppContainerContext CurrentRootContainer => rootContainerContext;
 
         public TypedefResolver TypedefResolver => typedefResolver;
 
-        public CppContainerContext GetOrCreateDeclarationContainer(CXCursor cursor, void* data)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CursorKey GetCursorKey(CXCursor cursor)
+        {
+            return new(rootContainerContext, cursor);
+        }
+
+        public CppContainerContext GetOrCreateDeclContainer(CXCursor cursor, void* data)
         {
             while (cursor.Kind == CXCursorKind.CXCursor_LinkageSpec)
             {
                 cursor = cursor.SemanticParent;
             }
 
-            if (TryGetDeclarationContainer(cursor, out var typeKey, out var containerContext))
+            var typeKey = GetCursorKey(cursor);
+            if (containers.TryGetValue(typeKey, out var containerContext))
             {
                 return containerContext;
             }
 
-            ICppContainer? symbol = null;
-            ICppDeclarationContainer? parent = null;
-            if (cursor.Kind != CXCursorKind.CXCursor_TranslationUnit && cursor.Kind != CXCursorKind.CXCursor_UnexposedDecl)
-            {
-                parent = GetOrCreateDeclarationContainer(cursor.SemanticParent, data).DeclarationContainer;
-            }
-
-            var defaultContainerVisibility = CppVisibility.Default;
-            switch (cursor.Kind)
-            {
-                case CXCursorKind.CXCursor_Namespace:
-                    var ns = new CppNamespace(CXUtil.GetCursorSpelling(cursor));
-                    symbol = ns;
-                    ns.IsInlineNamespace = cursor.IsInlineNamespace;
-                    defaultContainerVisibility = CppVisibility.Default;
-                    ((ICppGlobalDeclarationContainer)parent!).Namespaces.Add(ns);
-                    break;
-
-                case CXCursorKind.CXCursor_EnumDecl:
-                    var cppEnum = new CppEnum(CXUtil.GetCursorSpelling(cursor))
-                    {
-                        IsAnonymous = cursor.IsAnonymous,
-                        Visibility = cursor.GetVisibility()
-                    };
-                    parent!.Enums.Add(cppEnum);
-                    symbol = cppEnum;
-                    break;
-
-                case CXCursorKind.CXCursor_ClassTemplate:
-                case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
-                case CXCursorKind.CXCursor_ClassDecl:
-                case CXCursorKind.CXCursor_StructDecl:
-                case CXCursorKind.CXCursor_UnionDecl:
-                case CXCursorKind.CXCursor_ObjCInterfaceDecl:
-                case CXCursorKind.CXCursor_ObjCProtocolDecl:
-                case CXCursorKind.CXCursor_ObjCCategoryDecl:
-                    var cppClass = new CppClass(CXUtil.GetCursorSpelling(cursor));
-                    parent!.Classes.Add(cppClass);
-                    symbol = cppClass;
-                    cppClass.IsAnonymous = cursor.IsAnonymous;
-                    switch (cursor.Kind)
-                    {
-                        case CXCursorKind.CXCursor_ClassDecl:
-                        case CXCursorKind.CXCursor_ClassTemplate:
-                        case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
-                            cppClass.ClassKind = CppClassKind.Class;
-                            break;
-
-                        case CXCursorKind.CXCursor_StructDecl:
-                            cppClass.ClassKind = CppClassKind.Struct;
-                            break;
-
-                        case CXCursorKind.CXCursor_UnionDecl:
-                            cppClass.ClassKind = CppClassKind.Union;
-                            break;
-
-                        case CXCursorKind.CXCursor_ObjCInterfaceDecl:
-                            cppClass.ClassKind = CppClassKind.ObjCInterface;
-                            break;
-
-                        case CXCursorKind.CXCursor_ObjCProtocolDecl:
-                            cppClass.ClassKind = CppClassKind.ObjCProtocol;
-                            break;
-
-                        case CXCursorKind.CXCursor_ObjCCategoryDecl:
-                            {
-                                cppClass.ClassKind = CppClassKind.ObjCInterfaceCategory;
-
-                                // Fetch the target class for the category
-                                CXCursor parentCursor = default;
-                                cursor.VisitChildren((cxCursor, parent, clientData) =>
-                                {
-                                    if (cxCursor.Kind == CXCursorKind.CXCursor_ObjCClassRef)
-                                    {
-                                        parentCursor = cxCursor.Referenced;
-                                        return CXChildVisitResult.CXChildVisit_Break;
-                                    }
-
-                                    return CXChildVisitResult.CXChildVisit_Continue;
-                                }, default);
-
-                                var parentContainer = GetOrCreateDeclarationContainer(parentCursor, data).Container;
-                                var targetClass = (CppClass)parentContainer;
-                                cppClass.ObjCCategoryName = cppClass.Name;
-                                cppClass.Name = targetClass.Name;
-                                cppClass.ObjCCategoryTargetClass = targetClass;
-
-                                // Link back
-                                targetClass.ObjCCategories.Add(cppClass);
-                                break;
-                            }
-                    }
-
-                    cppClass.IsAbstract = cursor.CXXRecord_IsAbstract;
-
-                    if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplateSpecialization
-                        || cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
-                    {
-                        //Try to generate template class first
-                        cppClass.SpecializedTemplate = (CppClass)GetOrCreateDeclarationContainer(cursor.SpecializedCursorTemplate, data).Container;
-                        if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
-                        {
-                            cppClass.TemplateKind = CppTemplateKind.PartialTemplateClass;
-                        }
-                        else
-                        {
-                            cppClass.TemplateKind = CppTemplateKind.TemplateSpecializedClass;
-                        }
-
-                        //Just use low level api to call ClangSharp
-                        var tempArgsCount = cursor.NumTemplateArguments;
-                        var tempParams = cppClass.SpecializedTemplate.TemplateParameters;
-
-                        //Just use template class template params here
-                        foreach (var param in tempParams)
-                        {
-                            switch (param)
-                            {
-                                case CppTemplateParameterType paramType:
-                                    cppClass.TemplateParameters.Add(new CppTemplateParameterType(paramType.Name));
-                                    break;
-
-                                case CppTemplateParameterNonType nonType:
-                                    cppClass.TemplateParameters.Add(new CppTemplateParameterNonType(nonType.Name, nonType.NoneTemplateType));
-                                    break;
-                            }
-                        }
-
-                        if (cppClass.TemplateKind == CppTemplateKind.TemplateSpecializedClass)
-                        {
-                            Debug.Assert(cppClass.SpecializedTemplate.TemplateParameters.Count == tempArgsCount);
-                        }
-
-                        for (uint i = 0; i < tempArgsCount; i++)
-                        {
-                            var arg = cursor.GetTemplateArgument(i);
-                            switch (arg.kind)
-                            {
-                                case CXTemplateArgumentKind.CXTemplateArgumentKind_Type:
-                                    {
-                                        var argh = arg.AsType;
-                                        var argType = GetCppType(argh.Declaration, argh, cursor, data);
-                                        cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], argType, argh.TypeClass != CX_TypeClass.CX_TypeClass_TemplateTypeParm));
-                                    }
-                                    break;
-
-                                case CXTemplateArgumentKind.CXTemplateArgumentKind_Integral:
-                                    {
-                                        cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.AsIntegral));
-                                    }
-                                    break;
-
-                                default:
-                                    {
-                                        RootCompilation.Diagnostics.Warning($"Unhandled template argument with type {arg.kind}: {cursor.Kind}/{CXUtil.GetCursorSpelling(cursor)}", cursor.GetSourceLocation());
-                                        cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.ToString()));
-                                    }
-                                    break;
-                            }
-                            arg.Dispose();
-                        }
-                    }
-                    else
-                    {
-                        AddTemplateParameters(cursor, cppClass);
-                    }
-
-                    defaultContainerVisibility = cursor.Kind == CXCursorKind.CXCursor_ClassDecl ? CppVisibility.Private : CppVisibility.Public;
-                    break;
-
-                case CXCursorKind.CXCursor_TranslationUnit:
-                case CXCursorKind.CXCursor_UnexposedDecl:
-                case CXCursorKind.CXCursor_FirstInvalid:
-                    _containers.TryAdd(typeKey, _rootContainerContext);
-                    return _rootContainerContext;
-
-                default:
-                    Unhandled(cursor);
-                    // TODO: Workaround for now, as the container below would have an empty symbol
-                    goto case CXCursorKind.CXCursor_TranslationUnit;
-            }
-
-            containerContext = new CppContainerContext(symbol, CppContainerContextType.Unspecified) { CurrentVisibility = defaultContainerVisibility };
-
-            // The type could have been added separately as part of the GetCppType above TemplateParameters
-            _containers.TryAdd(typeKey, containerContext);
+            var visitor = DeclContainerVisitorRegistry.GetVisitor(cursor.Kind);
+            containerContext = visitor.Visit(context, cursor, cursor.SemanticParent, data);
+            containers.TryAdd(typeKey, containerContext);
             return containerContext;
         }
 
@@ -265,11 +87,11 @@ namespace HexaGen.CppAst.Parsing
             }
 
             var key = GetCursorKey(cursor);
-            if (!_objCTemplateParameterTypes.TryGetValue(key, out var templateParameterType))
+            if (!objCTemplateParameterTypes.TryGetValue(key, out var templateParameterType))
             {
                 var templateParameterName = CXUtil.GetCursorSpelling(cursor);
                 templateParameterType = new(templateParameterName);
-                _objCTemplateParameterTypes.Add(key, templateParameterType);
+                objCTemplateParameterTypes.Add(key, templateParameterType);
             }
             return templateParameterType;
         }
@@ -311,7 +133,7 @@ namespace HexaGen.CppAst.Parsing
         public bool TryGetDeclarationContainer(CXCursor cursor, out CursorKey typeKey, [NotNullWhen(true)] out CppContainerContext? containerContext)
         {
             typeKey = GetCursorKey(cursor);
-            return _containers.TryGetValue(typeKey, out containerContext);
+            return containers.TryGetValue(typeKey, out containerContext);
         }
 
         public void AddTemplateParameters(CXCursor cursor, CppClass cppClass)
@@ -344,7 +166,7 @@ namespace HexaGen.CppAst.Parsing
 
         public TCppElement GetOrCreateDeclarationContainer<TCppElement>(CXCursor cursor, void* data, out CppContainerContext context) where TCppElement : CppElement, ICppContainer
         {
-            context = GetOrCreateDeclarationContainer(cursor, data);
+            context = GetOrCreateDeclContainer(cursor, data);
             if (context.Container is TCppElement typedCppElement)
             {
                 return typedCppElement;
@@ -414,141 +236,58 @@ namespace HexaGen.CppAst.Parsing
             ParseAttributes(cursor, cppField, true);
         }
 
-        public void VisitInitValue(CXCursor cursor, void* data, out CppExpression? expression, out CppValue? value)
+        public void VisitInitValue(CXCursor cursor, out CppExpression? expression, out CppValue? value)
         {
-            CppExpression? localExpression = null;
-            CppValue? localValue = null;
-
-            cursor.VisitChildren((initCursor, varCursor, clientData) =>
+            expression = null;
+            cursor.VisitChildren(static (initCursor, varCursor, clientData) =>
             {
+                ref CppExpression? expression = ref Unsafe.AsRef<CppExpression?>(clientData);
                 if (initCursor.IsExpression())
                 {
-                    localExpression = VisitExpression(initCursor, clientData);
+                    expression = VisitExpression(initCursor, clientData);
                     return CXChildVisitResult.CXChildVisit_Break;
                 }
                 return CXChildVisitResult.CXChildVisit_Continue;
-            }, new CXClientData((nint)data));
+            }, (CXClientData)Unsafe.AsPointer(ref expression));
 
-            // Still tries to extract the compiled value
-            CXEvalResult resultEval = cursor.Evaluate;
-
+            using CXEvalResult resultEval = cursor.Evaluate;
             switch (resultEval.Kind)
             {
                 case CXEvalResultKind.CXEval_Int:
-                    localValue = new CppValue(resultEval.AsLongLong);
+                    value = new(resultEval.AsLongLong);
                     break;
 
                 case CXEvalResultKind.CXEval_Float:
-                    localValue = new CppValue(resultEval.AsDouble);
+                    value = new(resultEval.AsDouble);
                     break;
 
                 case CXEvalResultKind.CXEval_ObjCStrLiteral:
                 case CXEvalResultKind.CXEval_StrLiteral:
                 case CXEvalResultKind.CXEval_CFStr:
-                    localValue = new CppValue(resultEval.AsStr);
+                    value = new(resultEval.AsStr);
                     break;
 
                 case CXEvalResultKind.CXEval_UnExposed:
+                    value = null;
                     break;
 
                 default:
+                    value = null;
                     RootCompilation.Diagnostics.Warning($"Not supported field default value {CXUtil.GetCursorSpelling(cursor)}", cursor.GetSourceLocation());
                     break;
             }
-
-            expression = localExpression;
-            value = localValue;
-            resultEval.Dispose();
-        }
-
-        public CppEnum VisitEnumDecl(CXCursor cursor, void* data)
-        {
-            var cppEnum = GetOrCreateDeclarationContainer<CppEnum>(cursor, data, out var context);
-            if (cursor.IsDefinition && !context.IsChildrenVisited)
-            {
-                var integralType = cursor.EnumDecl_IntegerType;
-                cppEnum.IntegerType = GetCppType(integralType.Declaration, integralType, cursor, data);
-                cppEnum.IsScoped = cursor.EnumDecl_IsScoped;
-                ParseAttributes(cursor, cppEnum);
-                context.IsChildrenVisited = true;
-                cursor.VisitChildren(VisitMember, new CXClientData((nint)data));
-            }
-            return cppEnum;
-        }
-
-        public CppType VisitTypeDefDecl(CXCursor cursor, void* data)
-        {
-            var fulltypeDefName = GetCursorKey(cursor);
-            if (typedefResolver.TryResolve(fulltypeDefName, out var type))
-            {
-                return type;
-            }
-
-            var contextContainer = GetOrCreateDeclarationContainer(cursor.SemanticParent, data);
-            _currentTypedefKey = fulltypeDefName;
-            var underlyingTypeDefType = GetCppType(cursor.TypedefDeclUnderlyingType.Declaration, cursor.TypedefDeclUnderlyingType, cursor, data);
-            _currentTypedefKey = default;
-
-            var typedefName = CXUtil.GetCursorSpelling(cursor);
-
-            ICppDeclarationContainer? container = null;
-
-            if (AutoSquashTypedef && underlyingTypeDefType is ICppMember cppMember && (string.IsNullOrEmpty(cppMember.Name) || typedefName == cppMember.Name))
-            {
-                cppMember.Name = typedefName;
-                type = (CppType)cppMember;
-            }
-            else
-            {
-                var typedef = new CppTypedef(typedefName, underlyingTypeDefType) { Visibility = contextContainer.CurrentVisibility };
-                container = contextContainer.DeclarationContainer;
-                type = typedef;
-            }
-
-            ParseTypedefAttribute(cursor, type, underlyingTypeDefType);
-
-            // The type could have been added separately as part of the GetCppType above
-            typedefResolver.RegisterTypedef(fulltypeDefName, type);
-
-            // Try to remap typedef using a parameter type declared in an ObjC interface
-            if (_mapTemplateParameterTypeToTypedefKeys.Count > 0)
-            {
-                foreach (var pair in _mapTemplateParameterTypeToTypedefKeys.ToList())
-                {
-                    if (pair.Value.Contains(fulltypeDefName))
-                    {
-                        container = (ICppDeclarationContainer?)pair.Key.Parent;
-                        _mapTemplateParameterTypeToTypedefKeys.Remove(pair.Key);
-                        break;
-                    }
-                }
-            }
-
-            container?.Typedefs.Add((CppTypedef)type);
-
-            // Update Span
-            if (type is CppElement element)
-            {
-                element.AssignSourceSpan(cursor);
-                if (element is CppTypedef typedef && typedef.ElementType is CppClass && string.IsNullOrWhiteSpace(typedef.ElementType.SourceFile))
-                {
-                    typedef.ElementType.Span = element.Span;
-                }
-            }
-
-            return type;
         }
 
         private CppType VisitElaboratedDecl(CXCursor cursor, CXType type, CXCursor parent, void* data)
         {
-            var fulltypeDefName = GetCursorKey(cursor);
-            if (typedefResolver.TryResolve(fulltypeDefName, out var typeRef))
+            var key = GetCursorKey(cursor);
+            if (typedefResolver.TryResolve(key, out var typeRef))
             {
                 return typeRef;
             }
 
             // If the type has been already declared, return it immediately.
-            if (TryGetDeclarationContainer(cursor, out _, out var containerContext))
+            if (containers.TryGetValue(key, out var containerContext))
             {
                 return (CppType)containerContext.Container;
             }
@@ -651,11 +390,10 @@ namespace HexaGen.CppAst.Parsing
                     return VisitClassDecl(cursor, data);
 
                 case CXTypeKind.CXType_ObjCInterface:
-                    {
-                        return VisitClassDecl(cursor, data);
-                    }
+                    return VisitClassDecl(cursor, data);
+
                 case CXTypeKind.CXType_Enum:
-                    return VisitEnumDecl(cursor, data);
+                    return (CppType)MemberVisitorRegistry.GetVisitor<EnumDeclMemberVisitor>().Visit(context, cursor, parent, data)!;
 
                 case CXTypeKind.CXType_FunctionProto:
                     return VisitFunctionType(cursor, type, parent, data);
@@ -664,7 +402,7 @@ namespace HexaGen.CppAst.Parsing
                     return VisitBlockFunctionType(cursor, type, parent, data);
 
                 case CXTypeKind.CXType_Typedef:
-                    return VisitTypeDefDecl(cursor, data);
+                    return (CppType)MemberVisitorRegistry.GetVisitor<TypedefDeclVisitor>().Visit(context, cursor, parent, data)!;
 
                 case CXTypeKind.CXType_Elaborated:
                     return VisitElaboratedDecl(cursor, type, parent, data);
@@ -738,15 +476,16 @@ namespace HexaGen.CppAst.Parsing
 
                         // Record that a typedef is using a template parameter type
                         // which will require to re-parent the typedef to the Obj-C interface it belongs to
-                        if (_currentTypedefKey != default)
+                        if (context.CurrentTypedefKey != default)
                         {
-                            if (!_mapTemplateParameterTypeToTypedefKeys.TryGetValue(templateArgType, out var typedefKeys))
+                            var map = context.MapTemplateParameterTypeToTypedefKeys;
+                            if (!map.TryGetValue(templateArgType, out var typedefKeys))
                             {
                                 typedefKeys = [];
-                                _mapTemplateParameterTypeToTypedefKeys.Add(templateArgType, typedefKeys);
+                                map.Add(templateArgType, typedefKeys);
                             }
 
-                            typedefKeys.Add(_currentTypedefKey);
+                            typedefKeys.Add(context.CurrentTypedefKey);
                         }
 
                         return templateArgType;
@@ -807,7 +546,7 @@ namespace HexaGen.CppAst.Parsing
             var numTemplateArguments = type.NumTemplateArguments;
             if (numTemplateArguments < 0) return null;
 
-            var templateCppTypes = new List<CppType>();
+            List<CppType> templateCppTypes = [];
             for (var templateIndex = 0; templateIndex < numTemplateArguments; ++templateIndex)
             {
                 var templateArg = type.GetTemplateArgument((uint)templateIndex);
@@ -833,16 +572,11 @@ namespace HexaGen.CppAst.Parsing
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new InvalidOperationException();
                 }
             }
 
             return templateCppTypes;
-        }
-
-        public CursorKey GetCursorKey(CXCursor cursor)
-        {
-            return new(_rootContainerContext, cursor);
         }
     }
 }

@@ -12,7 +12,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var containerContext = Builder.GetOrCreateDeclarationContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
             containerContext.CurrentVisibility = cursor.GetVisibility();
             return null;
         }

@@ -5,20 +5,30 @@ namespace HexaGen.CppAst.Parsing
 {
     public class CppContainerContext
     {
-        public CppContainerContext(ICppContainer container, CppContainerContextType type)
+        public CppContainerContext(ICppContainer container, CppContainerContextType type, CppVisibility visibility = CppVisibility.Default)
         {
             Container = container;
             Type = type;
+            CurrentVisibility = visibility;
         }
 
-        public ICppContainer Container;
+        public CppContainerContext(ICppContainer container, CppVisibility visibility = CppVisibility.Default)
+        {
+            Container = container;
+            Type = CppContainerContextType.Unspecified;
+            CurrentVisibility = visibility;
+        }
+
+        public ICppContainer Container { get; }
 
         public ICppDeclarationContainer DeclarationContainer => (ICppDeclarationContainer)Container;
 
-        public CppVisibility CurrentVisibility;
+        public ICppGlobalDeclarationContainer GlobalDeclarationContainer => (ICppGlobalDeclarationContainer)Container;
+
+        public CppVisibility CurrentVisibility { get; set; }
 
         public CppContainerContextType Type { get; }
 
-        public bool IsChildrenVisited;
+        public bool IsChildrenVisited { get; set; }
     }
 }

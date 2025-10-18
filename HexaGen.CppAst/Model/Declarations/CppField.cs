@@ -61,12 +61,12 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Gets the associated init value (either an integer or a string...)
         /// </summary>
-        public CppValue InitValue { get; set; }
+        public CppValue? InitValue { get; set; }
 
         /// <summary>
         /// Gets the associated init value as an expression.
         /// </summary>
-        public CppExpression InitExpression { get; set; }
+        public CppExpression? InitExpression { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean indicating that this field is a bit field. See <see cref="BitFieldWidth"/> to get the width of this field if <see cref="IsBitField"/> is <c>true</c>

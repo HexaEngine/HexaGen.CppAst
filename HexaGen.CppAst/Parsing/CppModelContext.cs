@@ -3,6 +3,7 @@ namespace HexaGen.CppAst.Parsing
     using ClangSharp.Interop;
     using HexaGen.CppAst.Model.Declarations;
     using HexaGen.CppAst.Model.Metadata;
+    using HexaGen.CppAst.Model.Templates;
     using System.Runtime.InteropServices;
 
     public unsafe partial class CppModelContext
@@ -21,6 +22,10 @@ namespace HexaGen.CppAst.Parsing
         public CppModelBuilder Builder { get; }
 
         public CppClass? CurrentClassBeingVisited { get; set; }
+
+        public Dictionary<CppTemplateParameterType, HashSet<CursorKey>> MapTemplateParameterTypeToTypedefKeys { get; } = [];
+
+        public CursorKey CurrentTypedefKey { get; set; }
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

@@ -1,42 +1,69 @@
 using ClangSharp.Interop;
+using HexaGen.CppAst.Model;
 using HexaGen.CppAst.Parsing.Visitors.MemberVisitors;
 
 namespace HexaGen.CppAst.Parsing
 {
-    public static class CursorVisitorRegistry
+    public class CursorVisitorRegistry<TVisitor, TResult> where TVisitor : CursorVisitor<TResult>
     {
-        private static readonly Dictionary<Type, CursorVisitor> visitorTypes = [];
+        private readonly Dictionary<CXCursorKind, TVisitor> visitors = [];
+        private readonly Dictionary<Type, TVisitor> visitorTypes = [];
 
-        public static void Register<T>() where T : CursorVisitor, new()
+        public T Register<T>() where T : TVisitor, new()
         {
-            Register(new T());
+            var t = new T();
+            Register(t);
+            return t;
         }
 
-        public static void Register<T>(T visitor) where T : CursorVisitor
+        public void Register<T>(T visitor) where T : TVisitor
         {
             visitorTypes.Add(typeof(T), visitor);
+            foreach (var kind in visitor.Kinds)
+            {
+                visitors[kind] = visitor;
+            }
         }
 
-        public static void Override<T>(CursorVisitor visitor) where T : CursorVisitor
+        public void Override<T>(TVisitor visitor) where T : TVisitor
         {
+            var old = GetVisitor<T>();
+            foreach (var kind in old.Kinds)
+            {
+                visitors.Remove(kind);
+            }
             visitorTypes[typeof(T)] = visitor;
+            foreach (var kind in visitor.Kinds)
+            {
+                visitors[kind] = visitor;
+            }
         }
 
-        public static void Unregister<T>() where T : MemberVisitor
+        public void Unregister<T>() where T : TVisitor
         {
+            var old = GetVisitor<T>();
+            foreach (var kind in old.Kinds)
+            {
+                visitors.Remove(kind);
+            }
             visitorTypes.Remove(typeof(T));
         }
 
-        public static T GetVisitor<T>() where T : CursorVisitor
+        public T GetVisitor<T>() where T : TVisitor
         {
             return (T)visitorTypes[typeof(T)];
+        }
+
+        public TVisitor? GetVisitorByKind(CXCursorKind kind)
+        {
+            visitors.TryGetValue(kind, out var visitor);
+            return visitor;
         }
     }
 
     public static class MemberVisitorRegistry
     {
-        private static readonly Dictionary<CXCursorKind, MemberVisitor> visitors = [];
-        private static readonly Dictionary<Type, MemberVisitor> visitorTypes = [];
+        private static readonly CursorVisitorRegistry<MemberVisitor, CppElement> registry = new();
 
         static MemberVisitorRegistry()
         {
@@ -44,14 +71,14 @@ namespace HexaGen.CppAst.Parsing
             Register<CXXAccessSpecifierVisitor>();
             Register<CXXBaseSpecifierVisitor>();
             Register<EnumConstantVisitor>();
-            Register<EnumDeclVisitor>();
+            Register<EnumDeclMemberVisitor>();
             Register<FieldVariableVisitor>();
             Register<FlagEnumVisitor>();
             Register<FunctionDeclVisitor>();
             Register<InclusionDirectiveVisitor>();
             Register<LinkageSpecVisitor>();
             Register<MacroDefinitionVisitor>();
-            Register<NamespaceVisitor>();
+            Register<NamespaceMemberVisitor>();
             Register<ObjCClassProtocolRefVisitor>();
             Register<ObjCPropertyDeclVisitor>();
             Register<TypeAliasDeclVisitor>();
@@ -64,56 +91,16 @@ namespace HexaGen.CppAst.Parsing
             Register<TemplateTypeParameterVisitor>();
         }
 
-        public static T GetVisitor<T>() where T : MemberVisitor
-        {
-            return (T)visitorTypes[typeof(T)];
-        }
+        public static T GetVisitor<T>() where T : MemberVisitor => registry.GetVisitor<T>();
 
-        public static void Register<T>() where T : MemberVisitor, new()
-        {
-            Register(new T());
-        }
+        public static MemberVisitor Register<T>() where T : MemberVisitor, new() => registry.Register<T>();
 
-        public static void Register<T>(T visitor) where T : MemberVisitor
-        {
-            visitorTypes.Add(typeof(T), visitor);
-            foreach (var kind in visitor.Kinds)
-            {
-                visitors[kind] = visitor;
-            }
-            CursorVisitorRegistry.Register(visitor);
-        }
+        public static void Register<T>(T visitor) where T : MemberVisitor => registry.Register(visitor);
 
-        public static void Override<T>(MemberVisitor visitor) where T : MemberVisitor
-        {
-            var old = GetVisitor<T>();
-            foreach (var kind in old.Kinds)
-            {
-                visitors.Remove(kind);
-            }
-            visitorTypes[typeof(T)] = visitor;
-            foreach (var kind in visitor.Kinds)
-            {
-                visitors[kind] = visitor;
-            }
-            CursorVisitorRegistry.Override<T>(visitor);
-        }
+        public static void Override<T>(MemberVisitor visitor) where T : MemberVisitor => registry.Override<T>(visitor);
 
-        public static void Unregister<T>() where T : MemberVisitor
-        {
-            var old = GetVisitor<T>();
-            foreach (var kind in old.Kinds)
-            {
-                visitors.Remove(kind);
-            }
-            visitorTypes.Remove(typeof(T));
-            CursorVisitorRegistry.Unregister<T>();
-        }
+        public static void Unregister<T>() where T : MemberVisitor => registry.Unregister<T>();
 
-        public static MemberVisitor? GetVisitor(CXCursorKind kind)
-        {
-            visitors.TryGetValue(kind, out var visitor);
-            return visitor;
-        }
+        public static MemberVisitor? GetVisitor(CXCursorKind kind) => registry.GetVisitorByKind(kind);
     }
 }

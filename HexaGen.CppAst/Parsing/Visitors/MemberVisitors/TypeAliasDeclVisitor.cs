@@ -23,7 +23,7 @@
                 return type;
             }
 
-            var contextContainer = Builder.GetOrCreateDeclarationContainer(cursor.SemanticParent, data);
+            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data);
 
             var kind = cursor.Kind;
 

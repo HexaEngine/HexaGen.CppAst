@@ -1,0 +1,168 @@
+﻿namespace HexaGen.CppAst.Parsing.Visitors
+{
+    using ClangSharp.Interop;
+    using HexaGen.CppAst.Model;
+    using HexaGen.CppAst.Model.Declarations;
+    using HexaGen.CppAst.Model.Interfaces;
+    using HexaGen.CppAst.Model.Templates;
+    using HexaGen.CppAst.Parsing;
+    using HexaGen.CppAst.Utilities;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Runtime.CompilerServices;
+
+    public class ClassStructDeclVisitor : DeclContainerVisitor
+    {
+        public override IEnumerable<CXCursorKind> Kinds { get; } =
+        [
+            CXCursorKind.CXCursor_ClassTemplate,
+            CXCursorKind.CXCursor_ClassTemplatePartialSpecialization,
+            CXCursorKind.CXCursor_ClassDecl,
+            CXCursorKind.CXCursor_StructDecl,
+            CXCursorKind.CXCursor_UnionDecl,
+            CXCursorKind.CXCursor_ObjCInterfaceDecl,
+            CXCursorKind.CXCursor_ObjCProtocolDecl,
+            CXCursorKind.CXCursor_ObjCCategoryDecl,
+        ];
+
+        protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        {
+            ICppDeclarationContainer parentContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data).DeclarationContainer;
+
+            CppClass cppClass = new(CXUtil.GetCursorSpelling(cursor));
+            parentContainer.Classes.Add(cppClass);
+            cppClass.IsAnonymous = cursor.IsAnonymous;
+            switch (cursor.Kind)
+            {
+                case CXCursorKind.CXCursor_ClassDecl:
+                case CXCursorKind.CXCursor_ClassTemplate:
+                case CXCursorKind.CXCursor_ClassTemplatePartialSpecialization:
+                    cppClass.ClassKind = CppClassKind.Class;
+                    break;
+
+                case CXCursorKind.CXCursor_StructDecl:
+                    cppClass.ClassKind = CppClassKind.Struct;
+                    break;
+
+                case CXCursorKind.CXCursor_UnionDecl:
+                    cppClass.ClassKind = CppClassKind.Union;
+                    break;
+
+                case CXCursorKind.CXCursor_ObjCInterfaceDecl:
+                    cppClass.ClassKind = CppClassKind.ObjCInterface;
+                    break;
+
+                case CXCursorKind.CXCursor_ObjCProtocolDecl:
+                    cppClass.ClassKind = CppClassKind.ObjCProtocol;
+                    break;
+
+                case CXCursorKind.CXCursor_ObjCCategoryDecl:
+                    {
+                        cppClass.ClassKind = CppClassKind.ObjCInterfaceCategory;
+
+                        // Fetch the target class for the category
+                        CXCursor parentCursor = default;
+                        cursor.VisitChildren(static (cxCursor, parent, clientData) =>
+                        {
+                            ref CXCursor parentCursor = ref Unsafe.AsRef<CXCursor>(clientData);
+                            if (cxCursor.Kind == CXCursorKind.CXCursor_ObjCClassRef)
+                            {
+                                parentCursor = cxCursor.Referenced;
+                                return CXChildVisitResult.CXChildVisit_Break;
+                            }
+
+                            return CXChildVisitResult.CXChildVisit_Continue;
+                        }, (CXClientData)Unsafe.AsPointer(ref parentCursor));
+
+                        var parentClassContainer = Builder.GetOrCreateDeclContainer(parentCursor, data).Container;
+                        var targetClass = (CppClass)parentClassContainer;
+                        cppClass.ObjCCategoryName = cppClass.Name;
+                        cppClass.Name = targetClass.Name;
+                        cppClass.ObjCCategoryTargetClass = targetClass;
+
+                        // Link back
+                        targetClass.ObjCCategories.Add(cppClass);
+                        break;
+                    }
+            }
+
+            cppClass.IsAbstract = cursor.CXXRecord_IsAbstract;
+
+            if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplateSpecialization
+                || cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
+            {
+                //Try to generate template class first
+                cppClass.SpecializedTemplate = (CppClass)Builder.GetOrCreateDeclContainer(cursor.SpecializedCursorTemplate, data).Container;
+                if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
+                {
+                    cppClass.TemplateKind = CppTemplateKind.PartialTemplateClass;
+                }
+                else
+                {
+                    cppClass.TemplateKind = CppTemplateKind.TemplateSpecializedClass;
+                }
+
+                // Just use low level api to call ClangSharp
+                var tempArgsCount = cursor.NumTemplateArguments;
+                var tempParams = cppClass.SpecializedTemplate.TemplateParameters;
+
+                // Just use template class template params here
+                foreach (var param in tempParams)
+                {
+                    switch (param)
+                    {
+                        case CppTemplateParameterType paramType:
+                            cppClass.TemplateParameters.Add(new CppTemplateParameterType(paramType.Name));
+                            break;
+
+                        case CppTemplateParameterNonType nonType:
+                            cppClass.TemplateParameters.Add(new CppTemplateParameterNonType(nonType.Name, nonType.NoneTemplateType));
+                            break;
+                    }
+                }
+
+                if (cppClass.TemplateKind == CppTemplateKind.TemplateSpecializedClass)
+                {
+                    Debug.Assert(cppClass.SpecializedTemplate.TemplateParameters.Count == tempArgsCount);
+                }
+
+                for (uint i = 0; i < tempArgsCount; i++)
+                {
+                    var arg = cursor.GetTemplateArgument(i);
+                    switch (arg.kind)
+                    {
+                        case CXTemplateArgumentKind.CXTemplateArgumentKind_Type:
+                            {
+                                var argh = arg.AsType;
+                                var argType = Builder.GetCppType(argh.Declaration, argh, cursor, data);
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], argType, argh.TypeClass != CX_TypeClass.CX_TypeClass_TemplateTypeParm));
+                            }
+                            break;
+
+                        case CXTemplateArgumentKind.CXTemplateArgumentKind_Integral:
+                            {
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.AsIntegral));
+                            }
+                            break;
+
+                        default:
+                            {
+                                RootCompilation.Diagnostics.Warning($"Unhandled template argument with type {arg.kind}: {cursor.Kind}/{CXUtil.GetCursorSpelling(cursor)}", cursor.GetSourceLocation());
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.ToString()));
+                            }
+                            break;
+                    }
+                    arg.Dispose();
+                }
+            }
+            else
+            {
+                Builder.AddTemplateParameters(cursor, cppClass);
+            }
+
+            var visibility = cursor.Kind == CXCursorKind.CXCursor_ClassDecl ? CppVisibility.Private : CppVisibility.Public;
+
+            return new(cppClass, visibility);
+        }
+    }
+}

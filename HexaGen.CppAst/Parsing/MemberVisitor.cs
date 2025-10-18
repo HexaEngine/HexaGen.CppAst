@@ -1,15 +1,14 @@
 using ClangSharp.Interop;
 using HexaGen.CppAst.Model;
 using HexaGen.CppAst.Model.Metadata;
-using System.Runtime.CompilerServices;
 
 namespace HexaGen.CppAst.Parsing
 {
-    public abstract class MemberVisitor : CursorVisitor
+    public abstract class MemberVisitor : CursorVisitor<CppElement?>
     {
     }
 
-    public abstract class CursorVisitor
+    public abstract class CursorVisitor<TResult>
     {
         public CppModelContext Context { get; internal set; } = null!;
 
@@ -29,22 +28,16 @@ namespace HexaGen.CppAst.Parsing
 
         public virtual CXChildVisitResult VisitResult { get; } = CXChildVisitResult.CXChildVisit_Continue;
 
-        public unsafe CppElement? Visit(CppModelContext context, CXCursor cursor, CXCursor parent, void* data)
+        public unsafe TResult Visit(CppModelContext context, CXCursor cursor, CXCursor parent, void* data)
         {
             Context = context;
             if (CreateContainerContext)
             {
-                Container = Builder.GetOrCreateDeclarationContainer(parent, data);
+                Container = Builder.GetOrCreateDeclContainer(parent, data);
             }
             return VisitCore(cursor, parent, data);
         }
 
-        protected abstract unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T GetVisitor<T>() where T : CursorVisitor
-        {
-            return CursorVisitorRegistry.GetVisitor<T>();
-        }
+        protected abstract unsafe TResult VisitCore(CXCursor cursor, CXCursor parent, void* data);
     }
 }

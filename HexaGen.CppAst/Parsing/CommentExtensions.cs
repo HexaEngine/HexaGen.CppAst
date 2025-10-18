@@ -1,4 +1,4 @@
-﻿namespace HexaGen.CppAst.Parsing.Visitors
+﻿namespace HexaGen.CppAst.Parsing
 {
     using ClangSharp.Interop;
     using HexaGen.CppAst.Model.Metadata;
@@ -184,7 +184,7 @@
             for (uint i = 0; i < cxComment.NumChildren; i++)
             {
                 var cxChildComment = cxComment.GetChild(i);
-                var cppChildComment = ToComment(cxChildComment);
+                var cppChildComment = cxChildComment.ToComment();
                 if (cppChildComment != null)
                 {
                     cppComment.Children ??= [];

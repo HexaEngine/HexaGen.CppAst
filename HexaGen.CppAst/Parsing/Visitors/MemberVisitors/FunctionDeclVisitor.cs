@@ -22,7 +22,7 @@
 
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
         {
-            var contextContainer = Builder.GetOrCreateDeclarationContainer(cursor.SemanticParent, data);
+            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data);
             var container = contextContainer.DeclarationContainer;
 
             if (container == null)
@@ -160,7 +160,7 @@
                         cppFunction.Parameters.Add(parameter);
 
                         // Visit default parameter value
-                        Builder.VisitInitValue(argCursor, data, out var paramExpr, out var paramValue);
+                        Builder.VisitInitValue(argCursor, out var paramExpr, out var paramValue);
                         parameter.InitValue = paramValue;
                         parameter.InitExpression = paramExpr;
 
