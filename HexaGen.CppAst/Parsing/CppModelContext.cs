@@ -93,11 +93,11 @@ namespace HexaGen.CppAst.Parsing
             return new(rootContainerContext, cursor);
         }
 
-        public CppTemplateParameterType TryToCreateTemplateParametersObjC(CXCursor cursor)
+        public CppTemplateParameterType? TryToCreateTemplateParametersObjC(CXCursor cursor)
         {
             if (cursor.Kind != CXCursorKind.CXCursor_TemplateTypeParameter)
             {
-                throw new InvalidOperationException("Only CXCursor_TemplateTypeParameter is supported here");
+                return null;
             }
 
             var key = GetCursorKey(cursor);

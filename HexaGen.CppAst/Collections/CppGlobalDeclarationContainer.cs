@@ -110,6 +110,12 @@ namespace HexaGen.CppAst.Collections
                     return n;
                 }
 
+                var c = ns.FindByName(childName);
+                if (c != null)
+                {
+                    return c;
+                }
+
                 foreach (var sn in ns.Namespaces)
                 {
                     if (sn.IsInlineNamespace)

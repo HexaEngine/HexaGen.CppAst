@@ -6,7 +6,7 @@ using ClangSharp.Interop;
 
 namespace HexaGen.CppAst.Utilities
 {
-    public class AttributeTokenizer : Tokenizer
+    public unsafe class AttributeTokenizer : Tokenizer
     {
         public AttributeTokenizer(CXCursor cursor) : base(cursor)
         {

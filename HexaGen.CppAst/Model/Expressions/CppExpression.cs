@@ -93,7 +93,7 @@ namespace HexaGen.CppAst.Model.Expressions
 
         public void AppendTokens(CXCursor cursor)
         {
-            CppTokenUtil.Tokenizer tokenizer = new(cursor);
+            Tokenizer tokenizer = new(cursor);
             for (int i = 0; i < tokenizer.Count; i++)
             {
                 Tokens.Add(tokenizer[i]);

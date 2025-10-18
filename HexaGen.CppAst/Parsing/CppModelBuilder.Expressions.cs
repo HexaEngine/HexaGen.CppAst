@@ -29,7 +29,7 @@
                     break;
 
                 case CXCursorKind.CXCursor_UnaryOperator:
-                    var tokens = new CppTokenUtil.Tokenizer(cursor);
+                    var tokens = new Tokenizer(cursor);
                     expr = new CppUnaryExpression(CppExpressionKind.UnaryOperator)
                     {
                         Operator = tokens.Count > 0 ? tokens.GetString(0) : string.Empty

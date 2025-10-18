@@ -40,14 +40,14 @@ enum Enum0
                 {
                     Assert.False(compilation.HasErrors);
 
-                    var cppElements = compilation.Children().ToList();
+                    var cppElements = compilation.Children.ToList();
                     Assert.AreEqual(4, cppElements.Count);
 
                     var results = cppElements.Select(x => (x.Comment.ToString(), x.GetType())).ToList();
 
                     Assert.AreEqual(1, compilation.Enums.Count);
 
-                    results.AddRange(compilation.Enums[0].Children().Select(x => (x.Comment.ToString(), x.GetType())));
+                    results.AddRange(compilation.Enums[0].Children.Select(x => (x.Comment.ToString(), x.GetType())));
 
                     var expectedResults = new List<(string, Type)>()
                     {

@@ -138,7 +138,7 @@
 
         public static string GetCursorAsTextBetweenOffset(this in CXCursor cursor, int startOffset, int endOffset)
         {
-            CppTokenUtil.Tokenizer tokenizer = new(cursor);
+            Tokenizer tokenizer = new(cursor);
             StringBuilder builder = new();
             var previousTokenKind = CppTokenKind.Punctuation;
             for (int i = 0; i < tokenizer.Count; i++)
@@ -162,7 +162,7 @@
             return cursor.Kind >= CXCursorKind.CXCursor_FirstExpr && cursor.Kind <= CXCursorKind.CXCursor_LastExpr;
         }
 
-        public static string AsText(this in CXCursor cursor) => new CppTokenUtil.Tokenizer(cursor).TokensToString();
+        public static string AsText(this in CXCursor cursor) => new Tokenizer(cursor).TokensToString();
 
         public static bool IsCursorDefinition(this in CXCursor cursor, CppElement element)
         {

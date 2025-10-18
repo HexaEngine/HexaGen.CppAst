@@ -45,7 +45,7 @@
                     Visibility = containerContext.CurrentVisibility,
                     StorageQualifier = cursor.GetStorageQualifier(),
                     IsAnonymous = true,
-                    BitOffset = offset,
+                    BitOffset = offset * 8,
                 };
                 Builder.ParseAttributes(cursor, cppField, true);
                 containerContext.DeclarationContainer.Fields.Add(cppField);

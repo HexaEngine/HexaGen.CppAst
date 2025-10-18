@@ -167,7 +167,7 @@
 
         public unsafe void AddTemplateParameters(CXCursor cursor, CppClass cppClass)
         {
-            var ctx = (cppClass, Builder);
+            var ctx = (cppClass, Context);
             cursor.VisitChildren(static (childCursor, classCursor, clientData) =>
             {
                 var (cppClass, context) = Unsafe.AsRef<(CppClass, CppModelContext)>(clientData);
