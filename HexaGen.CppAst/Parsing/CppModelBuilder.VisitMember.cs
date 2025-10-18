@@ -3,6 +3,7 @@
     using ClangSharp.Interop;
     using HexaGen.CppAst.Model;
     using HexaGen.CppAst.Model.Interfaces;
+    using HexaGen.CppAst.Parsing.Visitors;
 
     public unsafe partial class CppModelBuilder
     {
@@ -58,18 +59,15 @@
 
             if (element is ICppDeclaration cppDeclaration)
             {
-                cppDeclaration.Comment = GetComment(cursor);
+                cppDeclaration.Comment = cursor.GetComment();
 
                 if (cppDeclaration is ICppAttributeContainer attrContainer && ParseCommentAttributeEnabled)
                 {
-                    TryToParseAttributesFromComment(cppDeclaration.Comment, attrContainer);
+                    cppDeclaration.Comment?.TryToParseAttributes(attrContainer);
                 }
             }
 
-            if (element is ICppAttributeContainer container)
-            {
-                TryToConvertAttributesToMetaAttributes(container);
-            }
+            element.ConvertToMetaAttributes();
 
             return visitor!.VisitResult;
         }

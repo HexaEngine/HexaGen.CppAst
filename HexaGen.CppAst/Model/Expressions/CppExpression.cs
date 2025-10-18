@@ -2,7 +2,9 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Declarations;
+using HexaGen.CppAst.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -62,7 +64,7 @@ namespace HexaGen.CppAst.Model.Expressions
     {
         public CppRawExpression(CppExpressionKind kind) : base(kind)
         {
-            Tokens = new List<CppToken>();
+            Tokens = [];
         }
 
         /// <summary>
@@ -87,6 +89,16 @@ namespace HexaGen.CppAst.Model.Expressions
         public override string ToString()
         {
             return Text;
+        }
+
+        public void AppendTokens(CXCursor cursor)
+        {
+            CppTokenUtil.Tokenizer tokenizer = new(cursor);
+            for (int i = 0; i < tokenizer.Count; i++)
+            {
+                Tokens.Add(tokenizer[i]);
+            }
+            UpdateTextFromTokens();
         }
     }
 

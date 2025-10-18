@@ -3,8 +3,6 @@
 // See license.txt file in the project root for full license information.
 
 using HexaGen.CppAst.Model.Types;
-using System;
-using System.Xml.Linq;
 
 namespace HexaGen.CppAst.Model.Templates
 {
@@ -23,15 +21,15 @@ namespace HexaGen.CppAst.Model.Templates
 
         public CppTemplateArgument(CppType sourceParam, long intArg) : base(CppTypeKind.TemplateArgumentType)
         {
-			SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
+            SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
             ArgAsInteger = intArg;
             ArgKind = CppTemplateArgumentKind.AsInteger;
             IsSpecializedArgument = true;
         }
 
-		public CppTemplateArgument(CppType sourceParam, string unknownStr) : base(CppTypeKind.TemplateArgumentType)
+        public CppTemplateArgument(CppType sourceParam, string? unknownStr) : base(CppTypeKind.TemplateArgumentType)
         {
-			SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
+            SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
             ArgAsUnknown = unknownStr;
             ArgKind = CppTemplateArgumentKind.Unknown;
             IsSpecializedArgument = true;
@@ -39,30 +37,25 @@ namespace HexaGen.CppAst.Model.Templates
 
         public CppTemplateArgumentKind ArgKind { get; }
 
-        public CppType ArgAsType { get; }
+        public CppType? ArgAsType { get; }
 
         public long ArgAsInteger { get; }
 
-        public string ArgAsUnknown { get; }
+        public string? ArgAsUnknown { get; }
 
         public string ArgString
         {
             get
             {
-                switch (ArgKind)
+                return ArgKind switch
                 {
-                    case CppTemplateArgumentKind.AsType:
-                        return ArgAsType.FullName;
-                    case CppTemplateArgumentKind.AsInteger:
-                        return ArgAsInteger.ToString();
-                    case CppTemplateArgumentKind.Unknown:
-                        return ArgAsUnknown;
-                    default:
-                        return "?";
-                }
+                    CppTemplateArgumentKind.AsType => ArgAsType?.FullName ?? "?",
+                    CppTemplateArgumentKind.AsInteger => ArgAsInteger.ToString(),
+                    CppTemplateArgumentKind.Unknown => ArgAsUnknown ?? "?",
+                    _ => "?",
+                };
             }
         }
-
 
         /// <summary>
         /// Gets the default value.
@@ -82,7 +75,6 @@ namespace HexaGen.CppAst.Model.Templates
         public override CppType GetCanonicalType() => this;
 
         /// <inheritdoc />
-
 
         /// <inheritdoc />
         public override string ToString() => $"{SourceParam} = {ArgString}";

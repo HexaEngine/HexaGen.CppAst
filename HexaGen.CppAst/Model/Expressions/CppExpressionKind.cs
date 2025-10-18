@@ -6,6 +6,7 @@ namespace HexaGen.CppAst.Model.Expressions
 {
     public enum CppExpressionKind
     {
+        Unknown,
         Unexposed,
         DeclRef,
         MemberRef,

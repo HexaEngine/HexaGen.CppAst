@@ -42,27 +42,27 @@ public sealed class CppProperty : CppDeclaration, ICppMember, ICppAttributeConta
 
     /// <inheritdoc />
     public string Name { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the name of the getter method.
     /// </summary>
     internal string GetterName { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the getter method.
     /// </summary>
-    public CppFunction Getter { get; set; }
-    
+    public CppFunction? Getter { get; set; }
+
     /// <summary>
     /// Gets or sets the name of the setter method.
     /// </summary>
     internal string SetterName { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the setter method.
     /// </summary>
-    public CppFunction Setter { get; set; }
-    
+    public CppFunction? Setter { get; set; }
+
     /// <inheritdoc />
     public override string ToString()
     {

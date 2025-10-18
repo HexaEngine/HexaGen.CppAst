@@ -91,7 +91,7 @@ namespace HexaGen.CppAst.Model.Declarations
         public override CppType GetCanonicalType() => IntegerType;
 
         /// <inheritdoc />
-        public override IEnumerable<ICppDeclaration> Children() => Items;
+        public override IEnumerable<ICppDeclaration> Children => Items;
 
         /// <inheritdoc />
         public override string ToString()

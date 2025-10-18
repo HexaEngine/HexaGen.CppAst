@@ -137,6 +137,26 @@ namespace HexaGen.CppAst.Collections
             get => _elements[index];
             set => _elements[index] = value;
         }
+
+        public TElement? Find<TUserdata>(TUserdata userdata, Func<TElement, TUserdata, bool> selector) where TUserdata : allows ref struct
+        {
+            foreach (var element in _elements)
+            {
+                if (selector(element, userdata))
+                {
+                    return element;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static class CppContainerListExtensions
+    {
+        public static TElement? FindByName<TElement>(this CppContainerList<TElement> list, ReadOnlySpan<char> name) where TElement : CppElement, ICppMember
+        {
+            return list.Find(name, static (x, name) => name.SequenceEqual(x.Name));
+        }
     }
 
     internal class CppContainerListDebugView<T>

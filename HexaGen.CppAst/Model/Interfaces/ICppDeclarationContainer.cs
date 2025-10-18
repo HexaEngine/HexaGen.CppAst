@@ -2,7 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
@@ -50,5 +49,25 @@ namespace HexaGen.CppAst.Model.Interfaces
 
         //Just use ICppAttributeContainer here(enum can support attribute, so we just use ICppAttributeContainer here)~~
         //CppContainerList<CppAttribute> Attributes { get; }
+    }
+
+    public static class ICppDeclarationContainerExtensions
+    {
+        public static CppElement? FindByName<T>(this T container, ReadOnlySpan<char> name) where T : ICppDeclarationContainer
+        {
+            var c = container.Classes.FindByName(name);
+            if (c != null) return c;
+
+            var e = container.Enums.FindByName(name);
+            if (e != null) return e;
+
+            var f = container.Functions.FindByName(name);
+            if (f != null) return f;
+
+            var t = container.Typedefs.FindByName(name);
+            if (t != null) return t;
+
+            return null;
+        }
     }
 }

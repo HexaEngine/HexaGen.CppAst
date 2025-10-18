@@ -5,8 +5,6 @@
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Metadata;
 using HexaGen.CppAst.Model.Types;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HexaGen.CppAst.Model.Declarations
 {
@@ -20,12 +18,9 @@ namespace HexaGen.CppAst.Model.Declarations
         }
 
         /// <inheritdoc />
-        public CppComment Comment { get; set; }
+        public CppComment? Comment { get; set; }
 
         /// <inheritdoc />
-        public virtual IEnumerable<ICppDeclaration> Children()
-        {
-            return Enumerable.Empty<ICppDeclaration>();
-        }
+        public virtual IEnumerable<ICppDeclaration> Children => [];
     }
 }

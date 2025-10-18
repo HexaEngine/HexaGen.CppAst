@@ -3,8 +3,6 @@
 // See license.txt file in the project root for full license information.
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Model.Attributes;
-using System;
-using System.Collections.Generic;
 
 namespace HexaGen.CppAst.Model.Interfaces
 {

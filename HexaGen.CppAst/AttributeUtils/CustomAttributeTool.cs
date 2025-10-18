@@ -12,28 +12,28 @@ namespace HexaGen.CppAst.AttributeUtils
 
         public override string ToString()
         {
-			var builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append($"{FeatureName} {{");
-            foreach ( var kvp in ArgumentMap )
+            foreach (var kvp in ArgumentMap)
             {
-                builder.Append( $"{kvp.Key}: {kvp.Value}, ");
+                builder.Append($"{kvp.Key}: {kvp.Value}, ");
             }
             builder.Append("}");
-			return builder.ToString();
-		}
+            return builder.ToString();
+        }
 
         public bool QueryKeyIsTrue(string key)
         {
             return ArgumentMap.ContainsKey(key) && (ArgumentMap[key] is bool && (bool)ArgumentMap[key] || ArgumentMap[key] is string && (string)ArgumentMap[key] == "true");
         }
-        
+
         public bool QueryKeysAreTrue(List<string> keys)
         {
             if (keys == null || !keys.Any())
             {
                 return false;
             }
-            
+
             foreach (string key in keys)
             {
                 if (!QueryKeyIsTrue(key))
@@ -44,7 +44,7 @@ namespace HexaGen.CppAst.AttributeUtils
 
             return true;
         }
-	}
+    }
 
     public class MetaAttributeMap
     {
@@ -57,7 +57,7 @@ namespace HexaGen.CppAst.AttributeUtils
                 return MetaList.Count == 0;
             }
         }
-        
+
         public object QueryArgument(string argName)
         {
             if (MetaList.Count == 0) return null;
@@ -69,7 +69,7 @@ namespace HexaGen.CppAst.AttributeUtils
                     return argMap.ArgumentMap[argName];
                 }
             }
-            
+
             return null;
         }
 
@@ -82,7 +82,7 @@ namespace HexaGen.CppAst.AttributeUtils
                 {
                     return Convert.ToBoolean(obj);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                 }
             }
@@ -123,6 +123,27 @@ namespace HexaGen.CppAst.AttributeUtils
 
             return defaultVal;
         }
+
+        public void Append(MetaAttribute? metaAttr)
+        {
+            if (metaAttr is null)
+            {
+                return;
+            }
+
+            foreach (MetaAttribute meta in MetaList)
+            {
+                foreach (KeyValuePair<string, object> kvp in meta.ArgumentMap)
+                {
+                    metaAttr.ArgumentMap.Remove(kvp.Key);
+                }
+            }
+
+            if (metaAttr.ArgumentMap.Count > 0)
+            {
+                MetaList.Add(metaAttr);
+            }
+        }
     }
 
     public static class CustomAttributeTool
@@ -147,41 +168,41 @@ namespace HexaGen.CppAst.AttributeUtils
             var attrArray = meta.Split(kMetaSeparate);
             var retList = new List<string>();
 
-            for(int i = 1; i < attrArray.Length; i++)
+            for (int i = 1; i < attrArray.Length; i++)
             {
                 retList.Add(attrArray[i]);
             }
 
             return retList;
         }
-        
+
         public static MetaAttribute ParseMetaStringFor(string meta, string needLeaderWord, out string errorMessage)
         {
             string feature = "", arguments = "";
             errorMessage = "";
-        
+
             if (!IsRstudioAttribute(meta))
             {
                 return null;
             }
-        
+
             List<string> tmpList = DivideForMetaAttribute(meta);
-            if(tmpList.Count < 2 || tmpList[0] != needLeaderWord)
+            if (tmpList.Count < 2 || tmpList[0] != needLeaderWord)
             {
                 return null;
             }
-        
+
             var arrVal = tmpList[1].Split(kMetaArgumentSeparate);
-            feature =  arrVal[0];
-            if(arrVal.Length >= 2)
+            feature = arrVal[0];
+            if (arrVal.Length >= 2)
             {
                 arguments = arrVal[1];
             }
-        
+
             MetaAttribute attribute = new MetaAttribute();
             attribute.FeatureName = feature;
             bool parseSuc = NamedParameterParser.ParseNamedParameters(arguments, attribute.ArgumentMap, out errorMessage);
-            if(parseSuc)
+            if (parseSuc)
             {
                 return attribute;
             }
@@ -196,13 +217,12 @@ namespace HexaGen.CppAst.AttributeUtils
             errorMessage = "";
             MetaAttribute attribute = new MetaAttribute();
             bool parseSuc = NamedParameterParser.ParseNamedParameters(meta, attribute.ArgumentMap, out errorMessage);
-            if(parseSuc)
+            if (parseSuc)
             {
                 return attribute;
             }
-            
+
             return null;
         }
-
     }
 }

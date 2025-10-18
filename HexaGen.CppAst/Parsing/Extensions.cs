@@ -1,10 +1,13 @@
 ﻿namespace HexaGen.CppAst.Parsing
 {
     using ClangSharp.Interop;
+    using HexaGen.CppAst.Extensions;
     using HexaGen.CppAst.Model;
+    using HexaGen.CppAst.Model.Expressions;
     using HexaGen.CppAst.Model.Metadata;
     using HexaGen.CppAst.Model.Types;
     using HexaGen.CppAst.Utilities;
+    using System.Text;
 
     public static class Extensions
     {
@@ -131,5 +134,33 @@
         {
             return diagnostic.Location.ToSourceLocation();
         }
+
+        public static string GetCursorAsTextBetweenOffset(this in CXCursor cursor, int startOffset, int endOffset)
+        {
+            CppTokenUtil.Tokenizer tokenizer = new(cursor);
+            StringBuilder builder = new();
+            var previousTokenKind = CppTokenKind.Punctuation;
+            for (int i = 0; i < tokenizer.Count; i++)
+            {
+                var token = tokenizer[i];
+                if (previousTokenKind.IsIdentifierOrKeyword() && token.Kind.IsIdentifierOrKeyword())
+                {
+                    builder.Append(' ');
+                }
+
+                if (token.Span.Start.Offset >= startOffset && token.Span.End.Offset <= endOffset)
+                {
+                    builder.Append(token.Text);
+                }
+            }
+            return builder.ToString();
+        }
+
+        public static bool IsExpression(this in CXCursor cursor)
+        {
+            return cursor.Kind >= CXCursorKind.CXCursor_FirstExpr && cursor.Kind <= CXCursorKind.CXCursor_LastExpr;
+        }
+
+        public static string AsText(this in CXCursor cursor) => new CppTokenUtil.Tokenizer(cursor).TokensToString();
     }
 }

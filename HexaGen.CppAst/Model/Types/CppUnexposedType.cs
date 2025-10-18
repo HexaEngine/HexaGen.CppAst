@@ -44,9 +44,6 @@ namespace HexaGen.CppAst.Model.Types
         /// <inheritdoc />
         public override string ToString() => Name;
 
-        public IEnumerable<ICppDeclaration> Children()
-        {
-            yield break;
-        }
+        public IEnumerable<ICppDeclaration> Children => [];
     }
 }

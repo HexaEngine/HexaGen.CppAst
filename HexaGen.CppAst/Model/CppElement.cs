@@ -3,12 +3,15 @@
 // See license.txt file in the project root for full license information.
 
 using ClangSharp.Interop;
+using HexaGen.CppAst.AttributeUtils;
+using HexaGen.CppAst.Model.Attributes;
 using HexaGen.CppAst.Model.Declarations;
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Metadata;
 using HexaGen.CppAst.Parsing;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace HexaGen.CppAst.Model
 {
@@ -17,6 +20,8 @@ namespace HexaGen.CppAst.Model
     /// </summary>
     public abstract class CppElement : ICppElement
     {
+        private string? cachedFullParentName;
+
         /// <summary>
         /// Gets or sets the source span of this element.
         /// </summary>
@@ -25,9 +30,9 @@ namespace HexaGen.CppAst.Model
         /// <summary>
         /// Gets or sets the parent container of this element. Might be null.
         /// </summary>
-        public ICppContainer Parent { get; internal set; }
+        public ICppContainer? Parent { get; internal set; }
 
-        public override sealed bool Equals(object obj) => ReferenceEquals(this, obj);
+        public override sealed bool Equals(object? obj) => ReferenceEquals(this, obj);
 
         public override sealed int GetHashCode() => RuntimeHelpers.GetHashCode(this);
 
@@ -35,24 +40,26 @@ namespace HexaGen.CppAst.Model
         {
             get
             {
-                string tmpname = "";
+                if (cachedFullParentName is not null)
+                {
+                    return cachedFullParentName;
+                }
+
+                StringBuilder sb = new();
                 var p = Parent;
                 while (p != null)
                 {
-                    if (p is CppClass)
+                    if (p is CppClass cpp)
                     {
-                        var cpp = p as CppClass;
-                        tmpname = $"{cpp.Name}::{tmpname}";
+                        sb.Insert(0, $"{cpp.Name}::");
                         p = cpp.Parent;
                     }
-                    else if (p is CppNamespace)
+                    else if (p is CppNamespace ns)
                     {
-                        var ns = p as CppNamespace;
-
-                        //Just ignore inline namespace
+                        // Just ignore inline namespace
                         if (!ns.IsInlineNamespace)
                         {
-                            tmpname = $"{ns.Name}::{tmpname}";
+                            sb.Insert(0, $"{ns.Name}::");
                         }
                         p = ns.Parent;
                     }
@@ -63,13 +70,15 @@ namespace HexaGen.CppAst.Model
                     }
                 }
 
-                //Try to remove not need `::` in string tails.
-                if (tmpname.EndsWith("::"))
+                // Try to remove not need `::` in string tails.
+                var len = sb.Length;
+                if (len > 2 && sb[len - 1] == ':' && sb[len - 2] == ':')
                 {
-                    tmpname = tmpname.Substring(0, tmpname.Length - 2);
+                    sb.Length -= 2;
                 }
 
-                return tmpname;
+                cachedFullParentName = sb.ToString();
+                return cachedFullParentName;
             }
         }
 
@@ -85,6 +94,29 @@ namespace HexaGen.CppAst.Model
             if (Span.Start.File is null)
             {
                 Span = new CppSourceSpan(start.ToSourceLocation(), end.ToSourceLocation());
+            }
+        }
+
+        [Obsolete("Remove me later, when all meta attributes are handled after the new api")]
+        public void ConvertToMetaAttributes()
+        {
+            if (this is not ICppAttributeContainer container) return;
+            foreach (var attr in container.Attributes)
+            {
+                //Now we only handle for annotate attribute here
+                if (attr.Kind == AttributeKind.AnnotateAttribute)
+                {
+                    MetaAttribute? metaAttr = null;
+
+                    metaAttr = CustomAttributeTool.ParseMetaStringFor(attr.Arguments, out string? errorMessage);
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        throw new Exception($"handle meta not right, detail: `{errorMessage}, location: `{Span}`");
+                    }
+
+                    container.MetaAttributes.Append(metaAttr);
+                }
             }
         }
     }

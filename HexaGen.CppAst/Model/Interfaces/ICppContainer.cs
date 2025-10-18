@@ -15,6 +15,6 @@ namespace HexaGen.CppAst.Model.Interfaces
         /// Gets of declaration from this container.
         /// </summary>
         /// <returns>A list of Cpp declaration</returns>
-        IEnumerable<ICppDeclaration> Children();
+        IEnumerable<ICppDeclaration> Children { get; }
     }
 }

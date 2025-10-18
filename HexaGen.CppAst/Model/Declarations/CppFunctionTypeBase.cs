@@ -6,8 +6,6 @@ using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Types;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace HexaGen.CppAst.Model.Declarations
@@ -46,12 +44,11 @@ namespace HexaGen.CppAst.Model.Declarations
         public override int SizeOf
         {
             get => 0;
-
             set => throw new InvalidOperationException("This type does not support SizeOf");
         }
 
         /// <inheritdoc />
-        public override IEnumerable<ICppDeclaration> Children() => Parameters;
+        public override IEnumerable<ICppDeclaration> Children => Parameters;
 
         /// <inheritdoc />
         public override CppType GetCanonicalType() => this;

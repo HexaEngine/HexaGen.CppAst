@@ -22,14 +22,14 @@ namespace HexaGen.CppAst.Collections
     /// </summary>
     public class CppGlobalDeclarationContainer : CppElement, ICppGlobalDeclarationContainer
     {
-        private readonly Dictionary<ICppContainer, Dictionary<string, CacheByName>> _multiCacheByName;
+        private readonly Dictionary<ICppContainer, Dictionary<string, CacheByName>> multiCacheByName;
 
         /// <summary>
         /// Create a new instance of this container.
         /// </summary>
         public CppGlobalDeclarationContainer()
         {
-            _multiCacheByName = new Dictionary<ICppContainer, Dictionary<string, CacheByName>>(ReferenceEqualityComparer<ICppContainer>.Default);
+            multiCacheByName = new Dictionary<ICppContainer, Dictionary<string, CacheByName>>(ReferenceEqualityComparer<ICppContainer>.Instance);
             Macros = new List<CppMacro>();
             Fields = new CppContainerList<CppField>(this);
             Functions = new CppContainerList<CppFunction>(this);
@@ -85,66 +85,43 @@ namespace HexaGen.CppAst.Collections
         /// </summary>
         public CppContainerList<CppInclusionDirective> InclusionDirectives { get; }
 
+        public static readonly string NamespaceSeparator = "::";
+
         /// <inheritdoc />
-        public virtual IEnumerable<ICppDeclaration> Children()
-        {
-            return CppContainerHelper.Children(this);
-        }
+        public virtual IEnumerable<ICppDeclaration> Children => CppContainerHelper.Children(this);
 
         /// <summary>
         /// Find a <see cref="CppElement"/> by name declared directly by this container.
         /// </summary>
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
-        public CppElement FindByName(string name)
+        public CppElement FindByName(ReadOnlySpan<char> name)
         {
             return FindByName(this, name);
         }
 
-        private CppElement SearchForChild(CppElement parent, string child_name)
+        private static CppElement? SearchForChild(CppElement parent, ReadOnlySpan<char> childName)
         {
-            ICppDeclarationContainer container = null;
-            if (parent is CppNamespace)
+            if (parent is CppNamespace ns)
             {
-                var ns = parent as CppNamespace;
-                var n = ns.Namespaces.FirstOrDefault(x => x.Name == child_name);
-                if (n != null) return n;
+                var n = ns.Namespaces.FindByName(childName);
+                if (n != null)
+                {
+                    return n;
+                }
 
-                container = ns;
-            }
-            else if (parent is CppClass)
-            {
-                container = parent as ICppDeclarationContainer;
-            }
-
-            if (container != null)
-            {
-                var c = container.Classes.FirstOrDefault(x => x.Name == child_name);
-                if (c != null) return c;
-
-                var e = container.Enums.FirstOrDefault(x => x.Name == child_name);
-                if (e != null) return e;
-
-                var f = container.Functions.FirstOrDefault(x => x.Name == child_name);
-                if (f != null) return f;
-
-                var t = container.Typedefs.FirstOrDefault(x => x.Name == child_name);
-                if (t != null) return t;
-            }
-
-            //Not found, try to find in inline namespace.
-            if (parent is CppNamespace)
-            {
-                var ns = parent as CppNamespace;
                 foreach (var sn in ns.Namespaces)
                 {
                     if (sn.IsInlineNamespace)
                     {
-                        var findElem = SearchForChild(sn, child_name);
-                        //Find it in inline namespace, just return.
+                        var findElem = SearchForChild(sn, childName);
                         if (findElem != null) return findElem;
                     }
                 }
+            }
+            else if (parent is ICppDeclarationContainer declarationContainer)
+            {
+                return declarationContainer.FindByName(childName);
             }
 
             return null;
@@ -155,24 +132,22 @@ namespace HexaGen.CppAst.Collections
         /// </summary>
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
-		public CppElement FindByFullName(string name)
+		public CppElement? FindByFullName(ReadOnlySpan<char> name)
         {
-            var arr = name.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
-            if (arr.Length == 0) return null;
+            if (name.IsEmpty || name.IsWhiteSpace()) return null;
 
-            CppElement elem = null;
-            for (int i = 0; i < arr.Length; i++)
+            CppElement? elem = null;
+            while (!name.IsEmpty)
             {
-                if (i == 0)
-                {
-                    elem = FindByName(arr[0]);
-                }
-                else
-                {
-                    elem = SearchForChild(elem, arr[i]);
-                }
+                var idx = name.IndexOf(NamespaceSeparator);
+                if (idx == -1) idx = name.Length;
+                var part = name[..idx];
+
+                elem = elem == null ? FindByName(part) : SearchForChild(elem, part);
 
                 if (elem == null) return null;
+                if (idx == name.Length) break;
+                name = name[(idx + NamespaceSeparator.Length)..];
             }
             return elem;
         }
@@ -182,9 +157,9 @@ namespace HexaGen.CppAst.Collections
         /// </summary>
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
-        public TCppElement FindByFullName<TCppElement>(string name) where TCppElement : CppElement
+        public TCppElement? FindByFullName<TCppElement>(ReadOnlySpan<char> name) where TCppElement : CppElement
         {
-            return (TCppElement)FindByFullName(name);
+            return (TCppElement?)FindByFullName(name);
         }
 
         /// <summary>
@@ -194,11 +169,8 @@ namespace HexaGen.CppAst.Collections
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public CppElement FindByName(ICppContainer container, string name)
+        public CppElement FindByName(ICppContainer container, ReadOnlySpan<char> name)
         {
-            if (container == null) throw new ArgumentNullException(nameof(container));
-            if (name == null) throw new ArgumentNullException(nameof(name));
-
             var cacheByName = FindByNameInternal(container, name);
             return cacheByName.Element;
         }
@@ -210,11 +182,8 @@ namespace HexaGen.CppAst.Collections
         /// <param name="name">Name of the element to find</param>
         /// <returns>A list of CppElement found or empty enumeration if not found</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public IEnumerable<CppElement> FindListByName(ICppContainer container, string name)
+        public IEnumerable<CppElement> FindListByName(ICppContainer container, ReadOnlySpan<char> name)
         {
-            if (container == null) throw new ArgumentNullException(nameof(container));
-            if (name == null) throw new ArgumentNullException(nameof(name));
-
             var cacheByName = FindByNameInternal(container, name);
             return cacheByName;
         }
@@ -224,7 +193,7 @@ namespace HexaGen.CppAst.Collections
         /// </summary>
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
-        public TCppElement FindByName<TCppElement>(string name) where TCppElement : CppElement
+        public TCppElement? FindByName<TCppElement>(ReadOnlySpan<char> name) where TCppElement : CppElement
         {
             return FindByName<TCppElement>(this, name);
         }
@@ -236,9 +205,9 @@ namespace HexaGen.CppAst.Collections
         /// <param name="name">Name of the element to find</param>
         /// <returns>The CppElement found or null if not found</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public TCppElement FindByName<TCppElement>(ICppContainer container, string name) where TCppElement : CppElement
+        public TCppElement? FindByName<TCppElement>(ICppContainer container, ReadOnlySpan<char> name) where TCppElement : CppElement
         {
-            return (TCppElement)FindByName(container, name);
+            return (TCppElement?)FindByName(container, name);
         }
 
         /// <summary>
@@ -250,17 +219,17 @@ namespace HexaGen.CppAst.Collections
         public void ClearCacheByName()
         {
             // TODO: reuse previous internal cache
-            _multiCacheByName.Clear();
+            multiCacheByName.Clear();
         }
 
-        private CacheByName FindByNameInternal(ICppContainer container, string name)
+        private CacheByName FindByNameInternal(ICppContainer container, ReadOnlySpan<char> name)
         {
-            if (!_multiCacheByName.TryGetValue(container, out var cacheByNames))
+            if (!multiCacheByName.TryGetValue(container, out var cacheByNames))
             {
-                cacheByNames = new Dictionary<string, CacheByName>();
-                _multiCacheByName.Add(container, cacheByNames);
+                cacheByNames = [];
+                multiCacheByName.Add(container, cacheByNames);
 
-                foreach (var element in container.Children())
+                foreach (var element in container.Children)
                 {
                     var cppElement = (CppElement)element;
                     if (element is ICppMember member && !string.IsNullOrEmpty(member.Name))
@@ -277,10 +246,7 @@ namespace HexaGen.CppAst.Collections
                         }
                         else
                         {
-                            if (cacheByName.List == null)
-                            {
-                                cacheByName.List = new List<CppElement>();
-                            }
+                            cacheByName.List ??= [];
                             cacheByName.List.Add(cppElement);
                         }
 
@@ -289,16 +255,16 @@ namespace HexaGen.CppAst.Collections
                 }
             }
 
-            return cacheByNames.TryGetValue(name, out var cacheByNameFound) ? cacheByNameFound : new CacheByName();
+            var lookup = cacheByNames.GetAlternateLookup<ReadOnlySpan<char>>();
+            return lookup.TryGetValue(name, out var cacheByNameFound) ? cacheByNameFound : new CacheByName();
         }
 
         private struct CacheByName : IEnumerable<CppElement>
         {
             public CppElement Element;
-
             public List<CppElement> List;
 
-            public IEnumerator<CppElement> GetEnumerator()
+            public readonly IEnumerator<CppElement> GetEnumerator()
             {
                 if (Element != null) yield return Element;
                 if (List != null)
@@ -310,7 +276,7 @@ namespace HexaGen.CppAst.Collections
                 }
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
+            readonly IEnumerator IEnumerable.GetEnumerator()
             {
                 return GetEnumerator();
             }
@@ -319,14 +285,14 @@ namespace HexaGen.CppAst.Collections
 
     internal class ReferenceEqualityComparer<T> : IEqualityComparer<T>
     {
-        public static readonly ReferenceEqualityComparer<T> Default = new ReferenceEqualityComparer<T>();
+        public static readonly ReferenceEqualityComparer<T> Instance = new();
 
         private ReferenceEqualityComparer()
         {
         }
 
         /// <inheritdoc />
-        public bool Equals(T x, T y)
+        public bool Equals(T? x, T? y)
         {
             return ReferenceEquals(x, y);
         }

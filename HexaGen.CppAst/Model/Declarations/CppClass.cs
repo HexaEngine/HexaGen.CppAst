@@ -301,21 +301,24 @@ namespace HexaGen.CppAst.Model.Declarations
             return builder.ToString();
         }
 
-        public override IEnumerable<ICppDeclaration> Children()
+        public override IEnumerable<ICppDeclaration> Children
         {
-            foreach (var item in CppContainerHelper.Children(this))
+            get
             {
-                yield return item;
-            }
+                foreach (var item in CppContainerHelper.Children(this))
+                {
+                    yield return item;
+                }
 
-            foreach (var item in Constructors)
-            {
-                yield return item;
-            }
+                foreach (var item in Constructors)
+                {
+                    yield return item;
+                }
 
-            foreach (var item in Destructors)
-            {
-                yield return item;
+                foreach (var item in Destructors)
+                {
+                    yield return item;
+                }
             }
         }
     }

@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using HexaGen.CppAst.Model.Attributes;
+using HexaGen.CppAst.Model.Interfaces;
 using System.Collections.Generic;
 using System.Text;
 
@@ -75,6 +77,31 @@ namespace HexaGen.CppAst.Model.Metadata
             ChildrenToString(builder);
             return builder.ToString();
         }
+
+        public void TryToParseAttributes(ICppAttributeContainer attrContainer)
+        {
+            if (this is CppCommentText ctxt && ctxt.Text != null)
+            {
+                var txt = ctxt.Text.Trim();
+                if (txt.StartsWith("[[") && txt.EndsWith("]]"))
+                {
+                    attrContainer.Attributes.Add(new CppAttribute("comment", AttributeKind.CommentAttribute)
+                    {
+                        Arguments = txt,
+                        Scope = "",
+                        IsVariadic = false,
+                    });
+                }
+            }
+
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.TryToParseAttributes(attrContainer);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -84,7 +111,7 @@ namespace HexaGen.CppAst.Model.Metadata
     {
         protected CppCommentCommand(CppCommentKind kind) : base(kind)
         {
-            Arguments = new List<string>();
+            Arguments = [];
         }
 
         public string CommandName { get; set; }

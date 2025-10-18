@@ -28,8 +28,8 @@ namespace HexaGen.CppAst.Model.Declarations
             Name = name;
             Parameters = new CppContainerList<CppParameter>(this);
             TemplateParameters = new CppContainerList<CppType>(this);
-            Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            Attributes = [];
+            TokenAttributes = [];
         }
 
         /// <inheritdoc />
@@ -48,7 +48,7 @@ namespace HexaGen.CppAst.Model.Declarations
         [Obsolete("TokenAttributes is deprecated. please use system attributes and annotate attributes")]
         public List<CppAttribute> TokenAttributes { get; }
 
-        public MetaAttributeMap MetaAttributes { get;} = new MetaAttributeMap();
+        public MetaAttributeMap MetaAttributes { get; } = new MetaAttributeMap();
 
         /// <summary>
         /// Gets or sets the storage qualifier.
@@ -69,7 +69,7 @@ namespace HexaGen.CppAst.Model.Declarations
         /// Gets or sets a boolean indicating whether this method is a constructor method.
         /// </summary>
         public bool IsConstructor { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a boolean indicating whether this method is a destructor method.
         /// </summary>
@@ -90,7 +90,7 @@ namespace HexaGen.CppAst.Model.Declarations
                 int default_count = 0;
                 foreach (var param in Parameters)
                 {
-                    if(param.InitExpression != null)
+                    if (param.InitExpression != null)
                     {
                         default_count++;
                     }
@@ -108,9 +108,9 @@ namespace HexaGen.CppAst.Model.Declarations
 
         public bool IsPureVirtual => ((int)Flags & (int)CppFunctionFlags.Pure) != 0;
 
-		public bool IsVirtual => ((int)Flags & (int)CppFunctionFlags.Virtual) != 0;
+        public bool IsVirtual => ((int)Flags & (int)CppFunctionFlags.Virtual) != 0;
 
-		public bool IsStatic => StorageQualifier == CppStorageQualifier.Static;
+        public bool IsStatic => StorageQualifier == CppStorageQualifier.Static;
 
         public bool IsConst => ((int)Flags & (int)CppFunctionFlags.Const) != 0;
 
@@ -122,18 +122,18 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <inheritdoc />
         public override string ToString()
         {
-            var builder = new StringBuilder();
+            StringBuilder builder = new();
 
             if (Visibility != CppVisibility.Default)
             {
                 builder.Append(Visibility.ToString().ToLowerInvariant());
-                builder.Append(" ");
+                builder.Append(' ');
             }
 
             if (StorageQualifier != CppStorageQualifier.None)
             {
                 builder.Append(StorageQualifier.ToString().ToLowerInvariant());
-                builder.Append(" ");
+                builder.Append(' ');
             }
 
             if ((Flags & CppFunctionFlags.Virtual) != 0)
@@ -146,7 +146,7 @@ namespace HexaGen.CppAst.Model.Declarations
                 if (ReturnType != null)
                 {
                     builder.Append(ReturnType.GetDisplayName());
-                    builder.Append(" ");
+                    builder.Append(' ');
                 }
                 else
                 {
@@ -155,7 +155,7 @@ namespace HexaGen.CppAst.Model.Declarations
             }
 
             builder.Append(Name);
-            builder.Append("(");
+            builder.Append('(');
             for (var i = 0; i < Parameters.Count; i++)
             {
                 var param = Parameters[i];
@@ -168,7 +168,7 @@ namespace HexaGen.CppAst.Model.Declarations
                 builder.Append(", ...");
             }
 
-            builder.Append(")");
+            builder.Append(')');
 
             if ((Flags & CppFunctionFlags.Const) != 0)
             {
@@ -183,6 +183,6 @@ namespace HexaGen.CppAst.Model.Declarations
         }
 
         /// <inheritdoc />
-        public IEnumerable<ICppDeclaration> Children() => Parameters;
+        public IEnumerable<ICppDeclaration> Children => Parameters;
     }
 }

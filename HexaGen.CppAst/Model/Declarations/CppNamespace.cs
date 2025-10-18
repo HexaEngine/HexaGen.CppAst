@@ -79,12 +79,6 @@ namespace HexaGen.CppAst.Model.Declarations
             return $"namespace {Name} {{...}}";
         }
 
-        public IEnumerable<ICppDeclaration> Children()
-        {
-            foreach (var item in CppContainerHelper.Children(this))
-            {
-                yield return item;
-            }
-        }
+        public IEnumerable<ICppDeclaration> Children => CppContainerHelper.Children(this);
     }
 }
