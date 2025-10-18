@@ -10,9 +10,9 @@
             CXCursorKind.CXCursor_LinkageSpec
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            cursor.VisitChildren(Builder.VisitMember, new CXClientData((nint)data));
+            cursor.VisitChildren(Builder.VisitMember, default);
             return null;
         }
     }

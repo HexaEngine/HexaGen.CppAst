@@ -11,7 +11,7 @@
             CXCursorKind.CXCursor_InclusionDirective
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             var file = cursor.IncludedFile;
             CppInclusionDirective inclusionDirective = new()

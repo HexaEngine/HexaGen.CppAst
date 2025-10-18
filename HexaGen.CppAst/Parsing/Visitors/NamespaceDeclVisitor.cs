@@ -10,9 +10,9 @@
     {
         public override IEnumerable<CXCursorKind> Kinds { get; } = [CXCursorKind.CXCursor_Namespace];
 
-        protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var parentContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data).GlobalDeclarationContainer;
+            var parentContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent).GlobalDeclarationContainer;
             CppNamespace ns = new(CXUtil.GetCursorSpelling(cursor))
             {
                 IsInlineNamespace = cursor.IsInlineNamespace

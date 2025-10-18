@@ -12,10 +12,10 @@
             CXCursorKind.CXCursor_CXXBaseSpecifier
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var cppClass = (CppClass)Builder.GetOrCreateDeclContainer(parent, data).Container;
-            var baseType = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor, data);
+            var cppClass = (CppClass)Builder.GetOrCreateDeclContainer(parent).Container;
+            var baseType = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor);
             var cppBaseType = new CppBaseType(baseType)
             {
                 Visibility = cursor.GetVisibility(),

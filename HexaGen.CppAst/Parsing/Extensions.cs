@@ -3,6 +3,7 @@
     using ClangSharp.Interop;
     using HexaGen.CppAst.Extensions;
     using HexaGen.CppAst.Model;
+    using HexaGen.CppAst.Model.Declarations;
     using HexaGen.CppAst.Model.Expressions;
     using HexaGen.CppAst.Model.Metadata;
     using HexaGen.CppAst.Model.Types;
@@ -162,5 +163,13 @@
         }
 
         public static string AsText(this in CXCursor cursor) => new CppTokenUtil.Tokenizer(cursor).TokensToString();
+
+        public static bool IsCursorDefinition(this in CXCursor cursor, CppElement element)
+        {
+            return cursor.IsDefinition || element is CppInclusionDirective || element is CppClass cppClass && (cppClass.ClassKind == CppClassKind.ObjCInterface ||
+                                                                                                                 cppClass.ClassKind == CppClassKind.ObjCProtocol ||
+                                                                                                                 cppClass.ClassKind == CppClassKind.ObjCInterfaceCategory)
+                ;
+        }
     }
 }

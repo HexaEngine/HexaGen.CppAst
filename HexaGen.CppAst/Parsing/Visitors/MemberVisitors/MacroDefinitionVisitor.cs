@@ -13,7 +13,7 @@
             CXCursorKind.CXCursor_MacroDefinition
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             // TODO: reuse internal class Tokenizer
 

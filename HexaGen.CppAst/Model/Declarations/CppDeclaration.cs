@@ -2,7 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
@@ -20,6 +19,6 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Gets or sets the comment attached to this element. Might be null.
         /// </summary>
-        public CppComment Comment { get; set; }
+        public CppComment? Comment { get; set; }
     }
 }

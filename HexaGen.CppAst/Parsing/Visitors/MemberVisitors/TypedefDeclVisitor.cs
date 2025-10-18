@@ -14,7 +14,7 @@
             CXCursorKind.CXCursor_TypedefDecl
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             var fulltypeDefName = Builder.GetCursorKey(cursor);
             if (TypedefResolver.TryResolve(fulltypeDefName, out var type))
@@ -22,9 +22,9 @@
                 return type;
             }
 
-            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data);
+            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent);
             Context.CurrentTypedefKey = fulltypeDefName;
-            var underlyingTypeDefType = Builder.GetCppType(cursor.TypedefDeclUnderlyingType.Declaration, cursor.TypedefDeclUnderlyingType, cursor, data);
+            var underlyingTypeDefType = Builder.GetCppType(cursor.TypedefDeclUnderlyingType.Declaration, cursor.TypedefDeclUnderlyingType, cursor);
             Context.CurrentTypedefKey = default;
 
             var typedefName = CXUtil.GetCursorSpelling(cursor);

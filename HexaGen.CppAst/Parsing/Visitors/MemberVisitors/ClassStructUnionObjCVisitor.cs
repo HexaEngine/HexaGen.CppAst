@@ -18,11 +18,11 @@
                 CXCursorKind.CXCursor_ObjCCategoryDecl
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             bool isAnonymous = cursor.IsAnonymous;
-            var cppClass = Builder.VisitClassDecl(cursor, data);
-            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
+            var cppClass = Builder.VisitClassDecl(cursor);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent);
             // Empty struct/class/union declaration are considered as fields
             if (isAnonymous)
             {

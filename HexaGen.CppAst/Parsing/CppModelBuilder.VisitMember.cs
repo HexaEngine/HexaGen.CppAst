@@ -6,7 +6,7 @@
 
     public unsafe partial class CppModelBuilder
     {
-        public CXChildVisitResult VisitMember(CXCursor cursor, CXCursor parent, void* data)
+        public CXChildVisitResult VisitMember(CXCursor cursor, CXCursor parent, void* data = null)
         {
             CppElement? element = null;
 
@@ -36,7 +36,7 @@
             var visitor = MemberVisitorRegistry.GetVisitor(cursor.Kind);
             if (visitor != null)
             {
-                element = visitor.Visit(context, cursor, parent, data);
+                element = visitor.Visit(context, cursor, parent);
             }
             else
             {
@@ -51,7 +51,7 @@
                 return CXChildVisitResult.CXChildVisit_Continue;
             }
 
-            if (element.SourceFile is null || IsCursorDefinition(cursor, element))
+            if (element.SourceFile is null || cursor.IsCursorDefinition(element))
             {
                 element.AssignSourceSpan(cursor);
             }

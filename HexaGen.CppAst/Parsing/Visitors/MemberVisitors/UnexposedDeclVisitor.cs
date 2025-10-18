@@ -10,7 +10,7 @@
 
         public override CXChildVisitResult VisitResult => CXChildVisitResult.CXChildVisit_Recurse;
 
-        protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             return null;
         }

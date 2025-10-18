@@ -11,13 +11,13 @@
             CXCursorKind.CXCursor_TypeRef
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             if (Context.CurrentClassBeingVisited != null && Context.CurrentClassBeingVisited.BaseTypes.Count == 1)
             {
                 var baseType = Context.CurrentClassBeingVisited.BaseTypes[0].Type;
                 CppGenericType genericType = baseType as CppGenericType ?? new CppGenericType(baseType);
-                var type = Builder.GetCppType(cursor.Referenced, cursor.Type, cursor, data);
+                var type = Builder.GetCppType(cursor.Referenced, cursor.Type, cursor);
                 genericType.GenericArguments.Add(type);
             }
             return null;

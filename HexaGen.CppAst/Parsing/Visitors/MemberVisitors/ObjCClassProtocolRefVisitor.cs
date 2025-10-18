@@ -13,12 +13,12 @@
                 CXCursorKind.CXCursor_ObjCProtocolRef
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var objCContainer = Builder.GetOrCreateDeclContainer(parent, data).Container;
+            var objCContainer = Builder.GetOrCreateDeclContainer(parent).Container;
             if (objCContainer is CppClass cppClass && cppClass.ClassKind != CppClassKind.ObjCInterfaceCategory)
             {
-                var referencedType = (CppClass)Builder.GetOrCreateDeclContainer(cursor.Referenced, data).Container;
+                var referencedType = (CppClass)Builder.GetOrCreateDeclContainer(cursor.Referenced).Container;
                 if (cursor.Kind == CXCursorKind.CXCursor_ObjCClassRef)
                 {
                     var cppBaseType = new CppBaseType(referencedType);

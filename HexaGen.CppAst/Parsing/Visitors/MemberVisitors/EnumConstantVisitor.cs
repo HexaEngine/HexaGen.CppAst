@@ -9,9 +9,9 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
     {
         public override IEnumerable<CXCursorKind> Kinds { get; } = [CXCursorKind.CXCursor_EnumConstantDecl];
 
-        protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override unsafe CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent);
             var cppEnum = (CppEnum)containerContext.Container;
             var enumItem = new CppEnumItem(CXUtil.GetCursorSpelling(cursor), cursor.EnumConstantDeclValue);
             Builder.ParseAttributes(cursor, enumItem, true);

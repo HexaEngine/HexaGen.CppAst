@@ -9,11 +9,11 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
     {
         public override IEnumerable<CXCursorKind> Kinds { get; } = [CXCursorKind.CXCursor_FieldDecl, CXCursorKind.CXCursor_VarDecl];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent);
             var fieldName = CXUtil.GetCursorSpelling(cursor);
-            var type = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor, data);
+            var type = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor);
 
             var previousField = containerContext.DeclarationContainer.Fields.LastOrDefault();
             CppField cppField;

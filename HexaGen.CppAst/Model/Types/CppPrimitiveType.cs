@@ -2,7 +2,9 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using System;
+using System.Collections.Frozen;
 
 namespace HexaGen.CppAst.Model.Types
 {
@@ -70,7 +72,7 @@ namespace HexaGen.CppAst.Model.Types
         /// Singleton instance of the `unsigned long` type.
         /// </summary>
         public static readonly CppPrimitiveType UnsignedLong = new CppPrimitiveType(CppPrimitiveKind.UnsignedLong);
-        
+
         /// <summary>
         /// Singleton instance of the `unsigned long long` type.
         /// </summary>
@@ -115,24 +117,22 @@ namespace HexaGen.CppAst.Model.Types
         /// Unsigned 128 bits integer type.
         /// </summary>
         public static readonly CppPrimitiveType UInt128 = new CppPrimitiveType(CppPrimitiveKind.UInt128);
-        
+
         /// <summary>
         /// 128 bits integer type.
         /// </summary>
         public static readonly CppPrimitiveType Int128 = new CppPrimitiveType(CppPrimitiveKind.Int128);
-        
+
         /// <summary>
         /// Float16 type.
         /// </summary>
         public static readonly CppPrimitiveType Float16 = new CppPrimitiveType(CppPrimitiveKind.Float16);
-        
+
         /// <summary>
         /// BFloat16 type.
         /// </summary>
         public static readonly CppPrimitiveType BFloat16 = new CppPrimitiveType(CppPrimitiveKind.BFloat16);
-        
 
-        
         private readonly int _sizeOf;
 
         /// <summary>
@@ -157,63 +157,81 @@ namespace HexaGen.CppAst.Model.Types
                 case CppPrimitiveKind.Void:
                     sizeOf = 0;
                     break;
+
                 case CppPrimitiveKind.Bool:
                     sizeOf = 1;
                     break;
+
                 case CppPrimitiveKind.WChar:
                     sizeOf = 2;
                     break;
+
                 case CppPrimitiveKind.Char:
                     sizeOf = 1;
                     break;
+
                 case CppPrimitiveKind.Short:
                     sizeOf = 2;
                     break;
+
                 case CppPrimitiveKind.Int:
                     sizeOf = 4;
                     break;
+
                 case CppPrimitiveKind.Long:
                 case CppPrimitiveKind.UnsignedLong:
                     sizeOf = 4; // This is incorrect
                     break;
+
                 case CppPrimitiveKind.LongLong:
                     sizeOf = 8;
                     break;
+
                 case CppPrimitiveKind.UnsignedChar:
                     sizeOf = 1;
                     break;
+
                 case CppPrimitiveKind.UnsignedShort:
                     sizeOf = 2;
                     break;
+
                 case CppPrimitiveKind.UnsignedInt:
                     sizeOf = 4;
                     break;
+
                 case CppPrimitiveKind.UnsignedLongLong:
                     sizeOf = 8;
                     break;
+
                 case CppPrimitiveKind.Float:
                     sizeOf = 4;
                     break;
+
                 case CppPrimitiveKind.Double:
                     sizeOf = 8;
                     break;
+
                 case CppPrimitiveKind.LongDouble:
                     sizeOf = 8;
                     break;
+
                 case CppPrimitiveKind.ObjCId:
                 case CppPrimitiveKind.ObjCSel:
                 case CppPrimitiveKind.ObjCClass:
                 case CppPrimitiveKind.ObjCObject:
                     sizeOf = 8; // Valid only for 64 bits
                     break;
+
                 case CppPrimitiveKind.UInt128:
                 case CppPrimitiveKind.Int128:
                     sizeOf = 16;
                     break;
+
                 case CppPrimitiveKind.Float16:
                 case CppPrimitiveKind.BFloat16:
                     sizeOf = 2;
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -269,5 +287,34 @@ namespace HexaGen.CppAst.Model.Types
         {
             return this;
         }
+
+        public static readonly FrozenDictionary<CXTypeKind, CppPrimitiveType> KindToPrimitive = new Dictionary<CXTypeKind, CppPrimitiveType>()
+        {
+            { CXTypeKind.CXType_Void, Void },
+            { CXTypeKind.CXType_Bool, Bool },
+            { CXTypeKind.CXType_UChar, UnsignedChar },
+            { CXTypeKind.CXType_UShort, UnsignedShort },
+            { CXTypeKind.CXType_UInt, UnsignedInt },
+            { CXTypeKind.CXType_ULong, UnsignedLong },
+            { CXTypeKind.CXType_ULongLong, UnsignedLongLong },
+            { CXTypeKind.CXType_SChar, Char },
+            { CXTypeKind.CXType_Char_S, Char },
+            { CXTypeKind.CXType_WChar, WChar },
+            { CXTypeKind.CXType_Short, Short },
+            { CXTypeKind.CXType_Int, Int },
+            { CXTypeKind.CXType_Long, Long },
+            { CXTypeKind.CXType_LongLong, LongLong },
+            { CXTypeKind.CXType_Float, Float },
+            { CXTypeKind.CXType_Double, Double },
+            { CXTypeKind.CXType_LongDouble, LongDouble },
+            { CXTypeKind.CXType_ObjCId, ObjCId },
+            { CXTypeKind.CXType_ObjCSel, ObjCSel },
+            { CXTypeKind.CXType_ObjCClass, ObjCClass },
+            { CXTypeKind.CXType_ObjCObject, ObjCObject },
+            { CXTypeKind.CXType_Int128, Int128 },
+            { CXTypeKind.CXType_UInt128, UInt128 },
+            { CXTypeKind.CXType_Float16, Float16 },
+            { CXTypeKind.CXType_BFloat16, BFloat16 },
+        }.ToFrozenDictionary();
     }
 }

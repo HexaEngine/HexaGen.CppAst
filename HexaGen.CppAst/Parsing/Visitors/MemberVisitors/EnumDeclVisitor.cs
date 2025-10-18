@@ -11,13 +11,13 @@
             CXCursorKind.CXCursor_EnumDecl
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var cppEnum = Builder.GetOrCreateDeclarationContainer<CppEnum>(cursor, data, out var context);
+            var cppEnum = Builder.GetOrCreateDeclarationContainer<CppEnum>(cursor, out var context);
             if (cursor.IsDefinition && !context.IsChildrenVisited)
             {
                 var integralType = cursor.EnumDecl_IntegerType;
-                cppEnum.IntegerType = Builder.GetCppType(integralType.Declaration, integralType, cursor, data);
+                cppEnum.IntegerType = Builder.GetCppType(integralType.Declaration, integralType, cursor);
                 cppEnum.IsScoped = cursor.EnumDecl_IsScoped;
                 Builder.ParseAttributes(cursor, cppEnum);
                 context.IsChildrenVisited = true;

@@ -7,6 +7,7 @@
     using HexaGen.CppAst.Utilities;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Runtime.CompilerServices;
 
     public unsafe class FunctionDeclVisitor : MemberVisitor
     {
@@ -20,9 +21,9 @@
                 CXCursorKind.CXCursor_ObjCInstanceMethodDecl
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent, data);
+            var contextContainer = Builder.GetOrCreateDeclContainer(cursor.SemanticParent);
             var container = contextContainer.DeclarationContainer;
 
             if (container == null)
@@ -71,17 +72,7 @@
             switch (cursor.Kind)
             {
                 case CXCursorKind.CXCursor_FunctionTemplate:
-                    cppFunction.Flags |= CppFunctionFlags.FunctionTemplate;
-                    //Handle template argument here~
-                    cursor.VisitChildren((childCursor, funcCursor, clientData) =>
-                    {
-                        var tmplParam = Builder.TryToCreateTemplateParameters(childCursor, clientData);
-                        if (tmplParam != null)
-                        {
-                            cppFunction.TemplateParameters.Add(tmplParam);
-                        }
-                        return CXChildVisitResult.CXChildVisit_Continue;
-                    }, new CXClientData((nint)data));
+                    ParseFuncTemplateParams(cursor, cppFunction);
                     break;
 
                 case CXCursorKind.CXCursor_ObjCInstanceMethodDecl:
@@ -106,12 +97,10 @@
             {
                 cppFunction.Flags |= CppFunctionFlags.Inline;
             }
-
             if (cursor.IsVariadic)
             {
                 cppFunction.Flags |= CppFunctionFlags.Variadic;
             }
-
             if (cursor.CXXMethod_IsConst)
             {
                 cppFunction.Flags |= CppFunctionFlags.Const;
@@ -134,7 +123,7 @@
             }
 
             // Gets the return type
-            var returnType = Builder.GetCppType(cursor.ResultType.Declaration, cursor.ResultType, cursor, data);
+            var returnType = Builder.GetCppType(cursor.ResultType.Declaration, cursor.ResultType, cursor);
             if (cppClass != null && cppClass.ClassKind == CppClassKind.ObjCInterface)
             {
                 if (returnType is CppTypedef typedef && typedef.Name == "instancetype")
@@ -148,14 +137,17 @@
             cppFunction.CallingConvention = cursor.Type.GetCallingConvention();
 
             int i = 0;
-            cursor.VisitChildren((argCursor, functionCursor, clientData) =>
+            var ctx = (cppFunction, Builder, i);
+            cursor.VisitChildren(static (argCursor, functionCursor, clientData) =>
             {
+                ref var ctx = ref Unsafe.AsRef<(CppFunction, CppModelBuilder, int)>(clientData);
+                var (cppFunction, Builder, _) = ctx;
                 switch (argCursor.Kind)
                 {
                     case CXCursorKind.CXCursor_ParmDecl:
                         var argName = CXUtil.GetCursorSpelling(argCursor);
 
-                        var parameter = new CppParameter(Builder.GetCppType(argCursor.Type.Declaration, argCursor.Type, argCursor, clientData), argName);
+                        var parameter = new CppParameter(Builder.GetCppType(argCursor.Type.Declaration, argCursor.Type, argCursor), argName);
 
                         cppFunction.Parameters.Add(parameter);
 
@@ -164,7 +156,7 @@
                         parameter.InitValue = paramValue;
                         parameter.InitExpression = paramExpr;
 
-                        i++;
+                        ctx.Item3++;
                         break;
 
                     // Don't generate a warning for unsupported cursor
@@ -178,9 +170,25 @@
                 }
 
                 return CXChildVisitResult.CXChildVisit_Continue;
-            }, new CXClientData((nint)data));
+            }, (CXClientData)Unsafe.AsPointer(ref ctx));
 
             return cppFunction;
+        }
+
+        private void ParseFuncTemplateParams(CXCursor cursor, CppFunction cppFunction)
+        {
+            var ctx = (cppFunction, Builder);
+            cppFunction.Flags |= CppFunctionFlags.FunctionTemplate;
+            cursor.VisitChildren(static (childCursor, funcCursor, clientData) =>
+            {
+                var (cppFunction, Builder) = Unsafe.AsRef<(CppFunction, CppModelBuilder)>(clientData);
+                var param = Builder.TryToCreateTemplateParameters(childCursor);
+                if (param != null)
+                {
+                    cppFunction.TemplateParameters.Add(param);
+                }
+                return CXChildVisitResult.CXChildVisit_Continue;
+            }, (CXClientData)Unsafe.AsPointer(ref ctx));
         }
     }
 }

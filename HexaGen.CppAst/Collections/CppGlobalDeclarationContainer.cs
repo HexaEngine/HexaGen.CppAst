@@ -31,14 +31,14 @@ namespace HexaGen.CppAst.Collections
         {
             multiCacheByName = new Dictionary<ICppContainer, Dictionary<string, CacheByName>>(ReferenceEqualityComparer<ICppContainer>.Instance);
             Macros = new List<CppMacro>();
-            Fields = new CppContainerList<CppField>(this);
-            Functions = new CppContainerList<CppFunction>(this);
+            Fields = new(this);
+            Functions = new(this);
             Enums = new CppContainerList<CppEnum>(this);
             Classes = new CppContainerList<CppClass>(this);
             Typedefs = new CppContainerList<CppTypedef>(this);
             Namespaces = new CppContainerList<CppNamespace>(this);
             Attributes = new List<CppAttribute>();
-            TokenAttributes = new List<CppAttribute>();
+            TokenAttributes = [];
             Properties = new CppContainerList<CppProperty>(this);
             InclusionDirectives = new CppContainerList<CppInclusionDirective>(this);
         }

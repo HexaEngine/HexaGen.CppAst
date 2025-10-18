@@ -25,7 +25,7 @@ namespace HexaGen.CppAst.Parsing
 
         public readonly Span<byte> AsSpan() => new(data, length);
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is CString @string && Equals(@string);
         }

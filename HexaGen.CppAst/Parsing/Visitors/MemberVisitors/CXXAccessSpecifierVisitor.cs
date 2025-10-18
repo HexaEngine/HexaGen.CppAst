@@ -10,9 +10,9 @@
             CXCursorKind.CXCursor_CXXAccessSpecifier
         ];
 
-        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent, void* data)
+        protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
-            var containerContext = Builder.GetOrCreateDeclContainer(parent, data);
+            var containerContext = Builder.GetOrCreateDeclContainer(parent);
             containerContext.CurrentVisibility = cursor.GetVisibility();
             return null;
         }
