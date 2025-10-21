@@ -1,5 +1,3 @@
-and i will license it like this
-
 MIT License
 
 Copyright (c) 2025 Juna Meinhold
