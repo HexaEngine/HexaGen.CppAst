@@ -1,26 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-		<PackageId>CppAst</PackageId>
-		<Description>CppAst is a .NET library providing a C/C++ parser for header files with access to the full AST, comments and macros</Description>
-		<Copyright>Alexandre Mutel</Copyright>
-		<Authors>Alexandre Mutel</Authors>
-		<PackageTags>parser;c++;ast;syntax</PackageTags>
-		<PackageProjectUrl>https://github.com/xoofx/CppAst</PackageProjectUrl>
-		<PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+		<LangVersion>13</LangVersion>
 
-		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+		<EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+		<EnableAotAnalyzer>true</EnableAotAnalyzer>
+		<IsAotCompatible>true</IsAotCompatible>
+
+		<AssemblyVersion>1.0.0</AssemblyVersion>
+		<PackageId>HexaGen.CppAst</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Description>HexaGen.CppAst is a rewrite/fork of CppAst which provides a C/C++ parser for header files with access to the full AST, comments and macros</Description>
+		<PackageTags>
+			Hexa HexaGen Hexa.NET parser c++ cpp c objc ast syntax clang header-files interop code-analysis parsing macros comments source-generation
+		</PackageTags>
+		<Authors>Juna Meinhold</Authors>
+		<Copyright>Copyright (c) 2025 Juna Meinhold</Copyright>
+		<PackageProjectUrl>https://github.com/HexaEngine/HexaGen.CppAst</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/HexaEngine/HexaGen.CppAst</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ClangSharp" Version="18.1.0.4" />
 		<PackageReference Include="libclang.runtime.win-x64" Version="18.1.3.2" />
 		<PackageReference Include="libClangSharp.runtime.win-x64" Version="18.1.3.1" />
-		<PackageReference Include="Hexa.NET.Utilities" Version="2.2.2" />
+		<PackageReference Include="Hexa.NET.Utilities" Version="2.2.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -30,5 +49,11 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="../LICENSE.txt" Pack="true" PackagePath="\" />
+		<Content Include="../README.md" Pack="true" PackagePath="\" />
+		<Content Include="../icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>
