@@ -54,7 +54,7 @@ namespace HexaGen.CppAst.Model.Expressions
         Lambda,
         ObjCBoolLiteral,
         ObjCSelf,
-        OMPArraySection,
+        OMPArrayShapingExpr,
         ObjCAvailabilityCheck,
         FixedPointLiteral,
     }

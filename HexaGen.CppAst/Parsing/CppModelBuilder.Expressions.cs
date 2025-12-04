@@ -131,7 +131,7 @@
             CXCursorKind.CXCursor_LambdaExpr => CppExpressionKind.Lambda,
             CXCursorKind.CXCursor_ObjCBoolLiteralExpr => CppExpressionKind.ObjCBoolLiteral,
             CXCursorKind.CXCursor_ObjCSelfExpr => CppExpressionKind.ObjCSelf,
-            CXCursorKind.CXCursor_OMPArraySectionExpr => CppExpressionKind.OMPArraySection,
+            CXCursorKind.CXCursor_OMPArrayShapingExpr => CppExpressionKind.OMPArrayShapingExpr,
             CXCursorKind.CXCursor_ObjCAvailabilityCheckExpr => CppExpressionKind.ObjCAvailabilityCheck,
             CXCursorKind.CXCursor_FixedPointLiteral => CppExpressionKind.FixedPointLiteral,
             _ => CppExpressionKind.Unknown,
