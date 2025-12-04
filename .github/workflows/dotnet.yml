@@ -32,10 +32,13 @@ jobs:
     - name: Test
       run: |
        dotnet test --no-build --verbosity normal
+
+    - name: Build (again)
+      run: |
+       dotnet build HexaGen.CppAst/HexaGen.CppAst.csproj --configuration Release
        
     - name: Build the package
       run: |
-       ls ./
        dotnet pack HexaGen.CppAst/HexaGen.CppAst.csproj --configuration Release --output ./nupkgs
        
     - name: Publish the package
