@@ -13,7 +13,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
         {
             var containerContext = Context.GetOrCreateDeclContainer(parent);
             var cppEnum = (CppEnum)containerContext.Container;
-            var enumItem = new CppEnumItem(CXUtil.GetCursorSpelling(cursor), cursor.EnumConstantDeclValue);
+            var enumItem = new CppEnumItem(cursor, CXUtil.GetCursorSpelling(cursor), cursor.EnumConstantDeclValue);
             Builder.ParseAttributes(cursor, enumItem, true);
 
             Builder.VisitInitValue(cursor, out var enumItemExpression, out var enumValue);

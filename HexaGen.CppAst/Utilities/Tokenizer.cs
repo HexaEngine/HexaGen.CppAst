@@ -19,11 +19,13 @@ namespace HexaGen.CppAst.Utilities
         private readonly CXSourceRange range;
         private CppToken[] cppTokens;
         protected readonly CXTranslationUnit tu;
+        private readonly CXCursor cursor;
 
         public Tokenizer(CXCursor cursor)
         {
             tu = cursor.TranslationUnit;
             range = GetRange(cursor);
+            this.cursor = cursor;
         }
 
         public Tokenizer(CXTranslationUnit tu, CXSourceRange range)
@@ -31,6 +33,8 @@ namespace HexaGen.CppAst.Utilities
             this.tu = tu;
             this.range = range;
         }
+
+        public CXCursor Cursor => cursor;
 
         public virtual CXSourceRange GetRange(CXCursor cursor)
         {
@@ -94,7 +98,7 @@ namespace HexaGen.CppAst.Utilities
                 var tokenLocation = token.GetLocation(tu);
 
                 var tokenRange = token.GetExtent(tu);
-                cppToken = new CppToken(cppTokenKind, tokenStr)
+                cppToken = new CppToken(cursor, cppTokenKind, tokenStr)
                 {
                     Span = tokenRange.ToSourceRange()
                 };

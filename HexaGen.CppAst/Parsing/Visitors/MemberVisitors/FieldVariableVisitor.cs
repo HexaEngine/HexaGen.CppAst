@@ -30,7 +30,7 @@ namespace HexaGen.CppAst.Parsing.Visitors.MemberVisitors
             }
             else
             {
-                cppField = new(type, fieldName)
+                cppField = new(cursor, type, fieldName)
                 {
                     Visibility = cursor.GetVisibility(),
                     StorageQualifier = cursor.GetStorageQualifier(),

@@ -1,12 +1,14 @@
 ﻿namespace HexaGen.CppAst.Parsing.Visitors
 {
     using ClangSharp.Interop;
+    using HexaGen.CppAst.Collections;
     using HexaGen.CppAst.Model;
     using HexaGen.CppAst.Model.Declarations;
     using HexaGen.CppAst.Model.Interfaces;
     using HexaGen.CppAst.Model.Templates;
     using HexaGen.CppAst.Parsing;
     using HexaGen.CppAst.Utilities;
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
@@ -29,7 +31,7 @@
         {
             ICppDeclarationContainer parentContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent).DeclarationContainer;
 
-            CppClass cppClass = new(CXUtil.GetCursorSpelling(cursor));
+            CppClass cppClass = new(cursor, CXUtil.GetCursorSpelling(cursor));
             parentContainer.Classes.Add(cppClass);
             cppClass.IsAnonymous = cursor.IsAnonymous;
             switch (cursor.Kind)
@@ -87,6 +89,9 @@
             }
 
             cppClass.IsAbstract = cursor.CXXRecord_IsAbstract;
+            cppClass.IsCompleteDefinition = cursor.IsCompleteDefinition;
+            cppClass.IsDefined = cursor.IsDefined;
+            cppClass.IsPODType = cursor.Type.IsPODType;
 
             if (cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplateSpecialization
                 || cursor.DeclKind == CX_DeclKind.CX_DeclKind_ClassTemplatePartialSpecialization)
@@ -107,16 +112,19 @@
                 var tempParams = cppClass.SpecializedTemplate.TemplateParameters;
 
                 // Just use template class template params here
-                foreach (var param in tempParams)
+                for (uint i = 0; i < tempParams.Count; i++)
                 {
+                    var param = tempParams[(int)i];
+                    var templateArgument = cursor.GetTemplateArgument(i);
+
                     switch (param)
                     {
                         case CppTemplateParameterType paramType:
-                            cppClass.TemplateParameters.Add(new CppTemplateParameterType(paramType.Name));
+                            cppClass.TemplateParameters.Add(new CppTemplateParameterType(templateArgument, paramType.Name));
                             break;
 
                         case CppTemplateParameterNonType nonType:
-                            cppClass.TemplateParameters.Add(new CppTemplateParameterNonType(nonType.Name, nonType.NoneTemplateType));
+                            cppClass.TemplateParameters.Add(new CppTemplateParameterNonType(templateArgument, nonType.Name, nonType.NoneTemplateType));
                             break;
                     }
                 }
@@ -135,20 +143,20 @@
                             {
                                 var argh = arg.AsType;
                                 var argType = Builder.GetCppType(argh.Declaration, argh, cursor);
-                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], argType, argh.TypeClass != CX_TypeClass.CX_TypeClass_TemplateTypeParm));
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(arg, tempParams[(int)i], argType, argh.TypeClass != CX_TypeClass.CX_TypeClass_TemplateTypeParm));
                             }
                             break;
 
                         case CXTemplateArgumentKind.CXTemplateArgumentKind_Integral:
                             {
-                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.AsIntegral));
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(arg, tempParams[(int)i], arg.AsIntegral));
                             }
                             break;
 
                         default:
                             {
                                 RootCompilation.Diagnostics.Warning($"Unhandled template argument with type {arg.kind}: {cursor.Kind}/{CXUtil.GetCursorSpelling(cursor)}", cursor.GetSourceLocation());
-                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(tempParams[(int)i], arg.ToString()));
+                                cppClass.TemplateSpecializedArguments.Add(new CppTemplateArgument(arg, tempParams[(int)i], arg.ToString()));
                             }
                             break;
                     }

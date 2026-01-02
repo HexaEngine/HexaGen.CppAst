@@ -45,7 +45,7 @@
                 return null;
             }
 
-            var cppFunction = new CppFunction(functionName)
+            var cppFunction = new CppFunction(cursor, functionName)
             {
                 Visibility = cursor.GetVisibility(),
                 StorageQualifier = cursor.GetStorageQualifier(),
@@ -128,7 +128,7 @@
             {
                 if (returnType is CppTypedef typedef && typedef.Name == "instancetype")
                 {
-                    returnType = new CppPointerType(cppClass);
+                    returnType = new CppPointerType(cursor, cppClass);
                 }
             }
             cppFunction.ReturnType = returnType;
@@ -147,7 +147,7 @@
                     case CXCursorKind.CXCursor_ParmDecl:
                         var argName = CXUtil.GetCursorSpelling(argCursor);
 
-                        var parameter = new CppParameter(Builder.GetCppType(argCursor.Type.Declaration, argCursor.Type, argCursor), argName);
+                        CppParameter parameter = new(argCursor, Builder.GetCppType(argCursor.Type.Declaration, argCursor.Type, argCursor), argName);
 
                         cppFunction.Parameters.Add(parameter);
 

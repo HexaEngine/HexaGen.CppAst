@@ -16,7 +16,7 @@
         {
             var containerContext = Context.GetOrCreateDeclContainer(parent);
             var cppEnum = (CppEnum)containerContext.Container;
-            cppEnum.Attributes.Add(new CppAttribute("flag_enum", AttributeKind.ObjectiveCAttribute));
+            cppEnum.Attributes.Add(new CppAttribute(cursor, "flag_enum", AttributeKind.ObjectiveCAttribute));
             return null;
         }
     }

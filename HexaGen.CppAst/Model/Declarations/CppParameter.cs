@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Expressions;
 using HexaGen.CppAst.Model.Interfaces;
@@ -20,7 +21,7 @@ namespace HexaGen.CppAst.Model.Declarations
         /// </summary>
         /// <param name="type">Type of the parameter.</param>
         /// <param name="name">Name of the parameter</param>
-        public CppParameter(CppType type, string name)
+        public CppParameter(CXCursor cursor, CppType type, string name) : base(cursor)
         {
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Name = name ?? throw new ArgumentNullException(nameof(name));

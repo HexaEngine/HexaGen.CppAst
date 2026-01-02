@@ -28,14 +28,14 @@
                     return null;
 
                 case CppCommentKind.Text:
-                    cppComment = new CppCommentText()
+                    cppComment = new CppCommentText(cxComment)
                     {
                         Text = CXUtil.GetComment_TextComment_Text(cxComment)?.TrimStart()
                     };
                     break;
 
                 case CppCommentKind.InlineCommand:
-                    var inline = new CppCommentInlineCommand();
+                    var inline = new CppCommentInlineCommand(cxComment);
                     inline.CommandName = CXUtil.GetComment_InlineCommandComment_CommandName(cxComment);
                     cppComment = inline;
                     switch (cxComment.InlineCommandComment_RenderKind)
@@ -64,7 +64,7 @@
                     break;
 
                 case CppCommentKind.HtmlStartTag:
-                    CppCommentHtmlStartTag htmlStartTag = new();
+                    CppCommentHtmlStartTag htmlStartTag = new(cxComment);
                     htmlStartTag.TagName = CXUtil.GetComment_HtmlTagComment_TagName(cxComment);
                     htmlStartTag.IsSelfClosing = cxComment.HtmlStartTagComment_IsSelfClosing;
                     for (uint i = 0; i < cxComment.HtmlStartTag_NumAttrs; i++)
@@ -78,17 +78,17 @@
                     break;
 
                 case CppCommentKind.HtmlEndTag:
-                    CppCommentHtmlEndTag htmlEndTag = new();
+                    CppCommentHtmlEndTag htmlEndTag = new(cxComment);
                     htmlEndTag.TagName = CXUtil.GetComment_HtmlTagComment_TagName(cxComment);
                     cppComment = htmlEndTag;
                     break;
 
                 case CppCommentKind.Paragraph:
-                    cppComment = new CppCommentParagraph();
+                    cppComment = new CppCommentParagraph(cxComment);
                     break;
 
                 case CppCommentKind.BlockCommand:
-                    CppCommentBlockCommand blockComment = new();
+                    CppCommentBlockCommand blockComment = new(cxComment);
                     blockComment.CommandName = CXUtil.GetComment_BlockCommandComment_CommandName(cxComment);
                     for (uint i = 0; i < cxComment.BlockCommandComment_NumArgs; i++)
                     {
@@ -100,7 +100,7 @@
                     break;
 
                 case CppCommentKind.ParamCommand:
-                    CppCommentParamCommand paramComment = new();
+                    CppCommentParamCommand paramComment = new(cxComment);
                     paramComment.CommandName = "param";
                     paramComment.ParamName = CXUtil.GetComment_ParamCommandComment_ParamName(cxComment);
                     paramComment.IsDirectionExplicit = cxComment.ParamCommandComment_IsDirectionExplicit;
@@ -126,7 +126,7 @@
                     break;
 
                 case CppCommentKind.TemplateParamCommand:
-                    CppCommentTemplateParamCommand tParamComment = new();
+                    CppCommentTemplateParamCommand tParamComment = new(cxComment);
                     tParamComment.CommandName = "tparam";
                     tParamComment.ParamName = CXUtil.GetComment_TParamCommandComment_ParamName(cxComment);
                     tParamComment.Depth = (int)cxComment.TParamCommandComment_Depth;
@@ -138,7 +138,7 @@
                     break;
 
                 case CppCommentKind.VerbatimBlockCommand:
-                    CppCommentVerbatimBlockCommand verbatimBlock = new();
+                    CppCommentVerbatimBlockCommand verbatimBlock = new(cxComment);
                     verbatimBlock.CommandName = CXUtil.GetComment_BlockCommandComment_CommandName(cxComment);
                     for (uint i = 0; i < cxComment.BlockCommandComment_NumArgs; i++)
                     {
@@ -158,21 +158,21 @@
                         text = text.Substring(0, indexOfLine);
                     }
 
-                    cppComment = new CppCommentVerbatimBlockLine()
+                    cppComment = new CppCommentVerbatimBlockLine(cxComment)
                     {
                         Text = text
                     };
                     break;
 
                 case CppCommentKind.VerbatimLine:
-                    cppComment = new CppCommentVerbatimLine()
+                    cppComment = new CppCommentVerbatimLine(cxComment)
                     {
                         Text = CXUtil.GetComment_VerbatimLineComment_Text(cxComment)
                     };
                     break;
 
                 case CppCommentKind.Full:
-                    cppComment = new CppCommentFull();
+                    cppComment = new CppCommentFull(cxComment);
                     break;
 
                 default:

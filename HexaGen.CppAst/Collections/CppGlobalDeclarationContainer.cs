@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Model;
 using HexaGen.CppAst.Model.Attributes;
@@ -27,7 +28,7 @@ namespace HexaGen.CppAst.Collections
         /// <summary>
         /// Create a new instance of this container.
         /// </summary>
-        public CppGlobalDeclarationContainer()
+        public CppGlobalDeclarationContainer(CXCursor cursor) : base(cursor)
         {
             multiCacheByName = new Dictionary<ICppContainer, Dictionary<string, CacheByName>>(ReferenceEqualityComparer<ICppContainer>.Instance);
             Macros = [];
@@ -104,7 +105,7 @@ namespace HexaGen.CppAst.Collections
         {
             if (parent is CppNamespace ns)
             {
-                var n = ns.Namespaces.FindByName(childName);
+                var n = ns.Namespaces.FindElementByName(childName);
                 if (n != null)
                 {
                     return n;

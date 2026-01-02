@@ -21,7 +21,7 @@
                 var referencedType = (CppClass)Context.GetOrCreateDeclContainer(cursor.Referenced).Container;
                 if (cursor.Kind == CXCursorKind.CXCursor_ObjCClassRef)
                 {
-                    var cppBaseType = new CppBaseType(referencedType);
+                    var cppBaseType = new CppBaseType(cursor, referencedType);
                     cppClass.BaseTypes.Add(cppBaseType);
                 }
                 else

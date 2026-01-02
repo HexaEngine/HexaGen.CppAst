@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Model.Interfaces;
 using System;
@@ -20,8 +21,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Creates an instance of this type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name">Fullname of the unexposed type</param>
-        public CppUnexposedType(string name) : base(CppTypeKind.Unexposed)
+        public CppUnexposedType(CXCursor cursor, string name) : base(cursor, CppTypeKind.Unexposed)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             TemplateParameters = new CppContainerList<CppType>(this);

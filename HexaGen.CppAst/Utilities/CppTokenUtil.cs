@@ -451,7 +451,7 @@ namespace HexaGen.CppAst.Utilities
                     var (scope, name) = GetNameSpaceAndAttribute(fullAttribute);
                     var (attributeName, arguments) = GetNameAndArguments(name);
 
-                    attribute = new CppAttribute(attributeName, AttributeKind.TokenAttribute);
+                    attribute = new CppAttribute(tokenIt.Cursor, attributeName, AttributeKind.TokenAttribute);
                     attribute.Scope = scope;
                     attribute.Arguments = arguments;
 
@@ -526,7 +526,7 @@ namespace HexaGen.CppAst.Utilities
 
             var previousToken = tokenIt.PreviousToken();
 
-            attribute = new CppAttribute(tokenIdentifier, AttributeKind.TokenAttribute)
+            attribute = new CppAttribute(tokenIt.Cursor, tokenIdentifier, AttributeKind.TokenAttribute)
             {
                 Span = new CppSourceSpan(firstToken.Span.Start, previousToken.Span.End),
                 Scope = scope,

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Interfaces;
@@ -18,8 +19,10 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Constructor of a function type.
         /// </summary>
+        /// <param name="cursor"></param>
+        /// <param name="kind"></param>
         /// <param name="returnType">Return type of this function type.</param>
-        protected CppFunctionTypeBase(CppTypeKind kind, CppType returnType) : base(kind)
+        protected CppFunctionTypeBase(CXCursor cursor, CppTypeKind kind, CppType returnType) : base(cursor, kind)
         {
             ReturnType = returnType ?? throw new ArgumentNullException(nameof(returnType));
             Parameters = new CppContainerList<CppParameter>(this);

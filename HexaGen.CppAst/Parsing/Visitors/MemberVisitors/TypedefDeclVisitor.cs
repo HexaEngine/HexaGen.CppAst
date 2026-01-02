@@ -38,7 +38,7 @@
             }
             else
             {
-                var typedef = new CppTypedef(typedefName, underlyingTypeDefType) { Visibility = contextContainer.CurrentVisibility };
+                CppTypedef typedef = new(cursor, typedefName, underlyingTypeDefType) { Visibility = contextContainer.CurrentVisibility };
                 container = contextContainer.DeclarationContainer;
                 type = typedef;
             }

@@ -13,7 +13,7 @@
         protected override unsafe CppContainerContext VisitCore(CXCursor cursor, CXCursor parent)
         {
             var parentContainer = Context.GetOrCreateDeclContainer(cursor.SemanticParent).GlobalDeclarationContainer;
-            CppNamespace ns = new(CXUtil.GetCursorSpelling(cursor))
+            CppNamespace ns = new(cursor, CXUtil.GetCursorSpelling(cursor))
             {
                 IsInlineNamespace = cursor.IsInlineNamespace
             };

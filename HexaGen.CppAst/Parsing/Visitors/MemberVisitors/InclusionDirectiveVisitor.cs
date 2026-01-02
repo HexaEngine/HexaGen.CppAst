@@ -14,10 +14,7 @@
         protected override CppElement? VisitCore(CXCursor cursor, CXCursor parent)
         {
             var file = cursor.IncludedFile;
-            CppInclusionDirective inclusionDirective = new()
-            {
-                FileName = Path.GetFullPath(file.Name.ToString())
-            };
+            CppInclusionDirective inclusionDirective = new(cursor, Path.GetFullPath(file.Name.ToString()));
             var rootContainer = (CppGlobalDeclarationContainer)CurrentRootContainer.DeclarationContainer;
             rootContainer.InclusionDirectives.Add(inclusionDirective);
             return inclusionDirective;

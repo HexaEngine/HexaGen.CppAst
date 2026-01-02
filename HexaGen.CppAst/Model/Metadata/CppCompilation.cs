@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Diagnostics;
 
@@ -10,17 +11,22 @@ namespace HexaGen.CppAst.Model.Metadata
     /// <summary>
     /// The result of a compilation for a sets of C++ files.
     /// </summary>
-    public class CppCompilation : CppGlobalDeclarationContainer
+    public class CppCompilation : CppGlobalDeclarationContainer, IDisposable
     {
+        private CXTranslationUnit translationUnit;
+
         /// <summary>
         /// Constructor of this object.
         /// </summary>
-        public CppCompilation()
+        public CppCompilation(CXTranslationUnit translationUnit) : base(translationUnit.Cursor)
         {
-            Diagnostics = new CppDiagnosticBag();
+            this.translationUnit = translationUnit;
+            Diagnostics = new();
 
-            System = new CppGlobalDeclarationContainer();
+            System = new(translationUnit.Cursor);
         }
+
+        public CXTranslationUnit TranslationUnit => translationUnit;
 
         /// <summary>
         /// Gets the attached diagnostic messages.
@@ -41,5 +47,16 @@ namespace HexaGen.CppAst.Model.Metadata
         /// Gets all the declarations that are coming from system include folders used by the declarations in this object.
         /// </summary>
         public CppGlobalDeclarationContainer System { get; }
+
+        public void Dispose()
+        {
+            if (translationUnit.Handle != IntPtr.Zero)
+            {
+                translationUnit.Dispose();
+                translationUnit = default;
+            }
+
+            GC.SuppressFinalize(this);
+        }
     }
 }

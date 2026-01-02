@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using System;
 
@@ -15,8 +16,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Constructor of a pointer type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="elementType">The element type pointed to.</param>
-        public CppPointerType(CppType elementType) : base(CppTypeKind.Pointer, elementType)
+        public CppPointerType(CXCursor cursor, CppType elementType) : base(cursor, CppTypeKind.Pointer, elementType)
         {
             SizeOf = nint.Size;
         }
@@ -32,7 +34,7 @@ namespace HexaGen.CppAst.Model.Types
         {
             var elementTypeCanonical = ElementType.GetCanonicalType();
             if (ReferenceEquals(elementTypeCanonical, ElementType)) return this;
-            return new CppPointerType(elementTypeCanonical);
+            return new CppPointerType(Cursor.CanonicalCursor, elementTypeCanonical);
         }
     }
 }

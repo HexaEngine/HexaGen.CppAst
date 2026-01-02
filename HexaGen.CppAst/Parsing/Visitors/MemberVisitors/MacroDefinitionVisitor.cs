@@ -43,7 +43,7 @@
                 return null;
             }
 
-            var cppMacro = new CppMacro(name);
+            CppMacro cppMacro = new(cursor, name);
 
             uint previousLine = 0;
             uint previousColumn = 0;
@@ -114,7 +114,7 @@
                             break;
                     }
 
-                    var cppToken = new CppToken(cppTokenKind, tokenStr)
+                    CppToken cppToken = new(cursor, cppTokenKind, tokenStr)
                     {
                         Span = tokenRange.ToSourceRange()
                     };

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +19,7 @@ namespace HexaGen.CppAst.Model.Expressions
         /// </summary>
         /// <param name="kind">Kind of this token</param>
         /// <param name="text">Text of this token</param>
-        public CppToken(CppTokenKind kind, string text)
+        public CppToken(CXCursor cursor, CppTokenKind kind, string text) : base(cursor)
         {
             Kind = kind;
             Text = text;

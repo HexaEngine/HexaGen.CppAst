@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using System.Collections.Generic;
 using System.Text;
@@ -13,20 +14,19 @@ namespace HexaGen.CppAst.Model.Types;
 /// </summary>
 public class CppGenericType : CppType
 {
-    public CppGenericType(CppType baseType) : base(CppTypeKind.GenericType)
+    public CppGenericType(CXCursor cursor, CppType baseType) : base(cursor, CppTypeKind.GenericType)
     {
         BaseType = baseType;
         GenericArguments = [];
     }
-    
-    public CppType BaseType { get; set; }
-    
-    public List<CppType> GenericArguments { get; }
-    
-    public override int SizeOf { get; set; }
-    
-    public override CppType GetCanonicalType() => this;
 
+    public CppType BaseType { get; set; }
+
+    public List<CppType> GenericArguments { get; }
+
+    public override int SizeOf { get; set; }
+
+    public override CppType GetCanonicalType() => this;
 
     public override string ToString()
     {

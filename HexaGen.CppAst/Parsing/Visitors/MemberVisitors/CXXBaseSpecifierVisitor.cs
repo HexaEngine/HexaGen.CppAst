@@ -16,7 +16,7 @@
         {
             var cppClass = Context.GetOrCreateDeclContainer<CppClass>(parent, out _);
             var baseType = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor);
-            var cppBaseType = new CppBaseType(baseType)
+            var cppBaseType = new CppBaseType(cursor, baseType)
             {
                 Visibility = cursor.GetVisibility(),
                 IsVirtual = cursor.IsVirtualBase

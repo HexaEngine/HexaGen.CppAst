@@ -23,7 +23,7 @@
                 {
                     case CXCursorKind.CXCursor_VisibilityAttr:
                         {
-                            CppAttribute attribute = new("visibility", AttributeKind.CxxSystemAttribute);
+                            CppAttribute attribute = new(argCursor, "visibility", AttributeKind.CxxSystemAttribute);
                             attribute.AssignSourceSpan(argCursor);
                             attribute.Arguments = string.Format("\"{0}\"", CXUtil.GetCursorDisplayName(argCursor));
                             attributes.Add(attribute);
@@ -32,7 +32,7 @@
 
                     case CXCursorKind.CXCursor_AnnotateAttr:
                         {
-                            CppAttribute attribute = new("annotate", AttributeKind.AnnotateAttribute)
+                            CppAttribute attribute = new(argCursor, "annotate", AttributeKind.AnnotateAttribute)
                             {
                                 Span = sourceSpan,
                                 Arguments = meta,
@@ -45,7 +45,7 @@
                     case CXCursorKind.CXCursor_AlignedAttr:
                         {
                             var attrKindSpelling = argCursor.AttrKindSpelling.ToLower();
-                            CppAttribute attribute = new("alignas", AttributeKind.CxxSystemAttribute)
+                            CppAttribute attribute = new(argCursor, "alignas", AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
                             };
@@ -59,7 +59,7 @@
                             var attrKind = argCursor.AttrKind;
                             var attrKindSpelling = argCursor.AttrKindSpelling.ToLower();
 
-                            CppAttribute attribute = new(attrKindSpelling, AttributeKind.CxxSystemAttribute)
+                            CppAttribute attribute = new(argCursor, attrKindSpelling, AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
                             };
@@ -74,7 +74,7 @@
                             var attrKind = argCursor.AttrKind;
                             var attrKindSpelling = argCursor.AttrKindSpelling.ToLower();
 
-                            CppAttribute attribute = new(attrKindSpelling, AttributeKind.CxxSystemAttribute)
+                            CppAttribute attribute = new(argCursor, attrKindSpelling, AttributeKind.CxxSystemAttribute)
                             {
                                 Span = sourceSpan,
                             };

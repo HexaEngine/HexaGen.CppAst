@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Types;
 
 namespace HexaGen.CppAst.Model.Templates
@@ -11,7 +12,7 @@ namespace HexaGen.CppAst.Model.Templates
     /// </summary>
     public class CppTemplateArgument : CppType
     {
-        public CppTemplateArgument(CppType sourceParam, CppType typeArg, bool isSpecializedArgument) : base(CppTypeKind.TemplateArgumentType)
+        public CppTemplateArgument(CXCursor cursor, CppType sourceParam, CppType typeArg, bool isSpecializedArgument) : base(cursor, CppTypeKind.TemplateArgumentType)
         {
             SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
             ArgAsType = typeArg ?? throw new ArgumentNullException(nameof(typeArg));
@@ -19,7 +20,7 @@ namespace HexaGen.CppAst.Model.Templates
             IsSpecializedArgument = isSpecializedArgument;
         }
 
-        public CppTemplateArgument(CppType sourceParam, long intArg) : base(CppTypeKind.TemplateArgumentType)
+        public CppTemplateArgument(CXCursor cursor, CppType sourceParam, long intArg) : base(cursor, CppTypeKind.TemplateArgumentType)
         {
             SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
             ArgAsInteger = intArg;
@@ -27,13 +28,42 @@ namespace HexaGen.CppAst.Model.Templates
             IsSpecializedArgument = true;
         }
 
-        public CppTemplateArgument(CppType sourceParam, string? unknownStr) : base(CppTypeKind.TemplateArgumentType)
+        public CppTemplateArgument(CXCursor cursor, CppType sourceParam, string? unknownStr) : base(cursor, CppTypeKind.TemplateArgumentType)
         {
             SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
             ArgAsUnknown = unknownStr;
             ArgKind = CppTemplateArgumentKind.Unknown;
             IsSpecializedArgument = true;
         }
+
+        public CppTemplateArgument(CX_TemplateArgument templateArgument, CppType sourceParam, CppType typeArg, bool isSpecializedArgument) : base(CXCursor.Null, CppTypeKind.TemplateArgumentType)
+        {
+            TemplateArgument = templateArgument;
+            SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
+            ArgAsType = typeArg ?? throw new ArgumentNullException(nameof(typeArg));
+            ArgKind = CppTemplateArgumentKind.AsType;
+            IsSpecializedArgument = isSpecializedArgument;
+        }
+
+        public CppTemplateArgument(CX_TemplateArgument templateArgument, CppType sourceParam, long intArg) : base(CXCursor.Null, CppTypeKind.TemplateArgumentType)
+        {
+            TemplateArgument = templateArgument;
+            SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
+            ArgAsInteger = intArg;
+            ArgKind = CppTemplateArgumentKind.AsInteger;
+            IsSpecializedArgument = true;
+        }
+
+        public CppTemplateArgument(CX_TemplateArgument templateArgument, CppType sourceParam, string? unknownStr) : base(CXCursor.Null, CppTypeKind.TemplateArgumentType)
+        {
+            TemplateArgument = templateArgument;
+            SourceParam = sourceParam ?? throw new ArgumentNullException(nameof(sourceParam));
+            ArgAsUnknown = unknownStr;
+            ArgKind = CppTemplateArgumentKind.Unknown;
+            IsSpecializedArgument = true;
+        }
+
+        public CX_TemplateArgument TemplateArgument { get; set; }
 
         public CppTemplateArgumentKind ArgKind { get; }
 

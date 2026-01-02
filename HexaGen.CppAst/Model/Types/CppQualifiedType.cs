@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 
 namespace HexaGen.CppAst.Model.Types
@@ -14,9 +15,10 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Constructor for a C++ qualified type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="qualifier">The C++ qualified (e.g `const`)</param>
         /// <param name="elementType">The element type (e.g `int`)</param>
-        public CppQualifiedType(CppTypeQualifier qualifier, CppType elementType) : base(CppTypeKind.Qualified, elementType)
+        public CppQualifiedType(CXCursor cursor, CppTypeQualifier qualifier, CppType elementType) : base(cursor, CppTypeKind.Qualified, elementType)
         {
             Qualifier = qualifier;
             SizeOf = elementType.SizeOf;
@@ -31,7 +33,7 @@ namespace HexaGen.CppAst.Model.Types
         public override CppType GetCanonicalType()
         {
             var elementTypeCanonical = ElementType.GetCanonicalType();
-            return ReferenceEquals(elementTypeCanonical, ElementType) ? this : new CppQualifiedType(Qualifier, elementTypeCanonical);
+            return ReferenceEquals(elementTypeCanonical, ElementType) ? this : new CppQualifiedType(Cursor.CanonicalCursor, Qualifier, elementTypeCanonical);
         }
 
         /// <inheritdoc />

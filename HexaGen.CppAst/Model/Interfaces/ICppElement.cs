@@ -4,10 +4,13 @@
 
 namespace HexaGen.CppAst.Model.Interfaces
 {
+    using ClangSharp.Interop;
+
     /// <summary>
     /// Base interface of for <see cref="CppElement"/>
     /// </summary>
     public interface ICppElement
     {
+        public CXCursor Cursor { get; }
     }
 }

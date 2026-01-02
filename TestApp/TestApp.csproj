@@ -11,4 +11,10 @@
     <ProjectReference Include="..\HexaGen.CppAst\HexaGen.CppAst.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="test1.h">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

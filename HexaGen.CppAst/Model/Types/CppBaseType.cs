@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Declarations;
 using HexaGen.CppAst.Model.Templates;
@@ -18,8 +19,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Creates a base type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="baseType">Type of the base</param>
-        public CppBaseType(CppType baseType)
+        public CppBaseType(CXCursor cursor, CppType baseType) : base(cursor)
         {
             Type = baseType ?? throw new ArgumentNullException(nameof(baseType));
         }

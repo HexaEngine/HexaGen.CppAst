@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using System;
 
 namespace HexaGen.CppAst.Model.Types
@@ -11,7 +12,7 @@ namespace HexaGen.CppAst.Model.Types
     /// </summary>
     public abstract class CppTypeWithElementType : CppType
     {
-        protected CppTypeWithElementType(CppTypeKind typeKind, CppType elementType) : base(typeKind)
+        protected CppTypeWithElementType(CXCursor cursor, CppTypeKind typeKind, CppType elementType) : base(cursor, typeKind)
         {
             ElementType = elementType ?? throw new ArgumentNullException(nameof(elementType));
         }

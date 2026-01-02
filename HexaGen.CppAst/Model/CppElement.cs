@@ -22,6 +22,13 @@ namespace HexaGen.CppAst.Model
     {
         private string? cachedFullParentName;
 
+        protected CppElement(CXCursor cursor)
+        {
+            Cursor = cursor;
+        }
+
+        public CXCursor Cursor { get; set; }
+
         /// <summary>
         /// Gets or sets the source span of this element.
         /// </summary>

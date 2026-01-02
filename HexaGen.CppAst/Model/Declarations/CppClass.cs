@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Model.Attributes;
@@ -9,8 +10,6 @@ using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Templates;
 using HexaGen.CppAst.Model.Types;
 using HexaGen.CppAst.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace HexaGen.CppAst.Model.Declarations
@@ -23,8 +22,9 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Creates a new instance.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name">Name of this type.</param>
-        public CppClass(string name) : base(CppTypeKind.StructOrClass)
+        public CppClass(CXCursor cursor, string name) : base(cursor, CppTypeKind.StructOrClass)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             BaseTypes = [];
@@ -133,6 +133,8 @@ namespace HexaGen.CppAst.Model.Declarations
         /// </summary>
         public bool IsDefinition { get; set; }
 
+        public CppClass? Definition { get; set; }
+
         /// <summary>
         /// Gets or sets a boolean indicating if this declaration is anonymous.
         /// </summary>
@@ -194,6 +196,12 @@ namespace HexaGen.CppAst.Model.Declarations
         public bool IsEmbeded => Parent is CppClass;
 
         public bool IsAbstract { get; set; }
+
+        public bool IsCompleteDefinition { get; set; }
+
+        public bool IsDefined { get; internal set; }
+
+        public bool IsPODType { get; set; }
 
         /// <inheritdoc />
         public override int SizeOf { get; set; }

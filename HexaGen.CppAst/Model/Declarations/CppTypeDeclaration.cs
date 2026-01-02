@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Model.Metadata;
 using HexaGen.CppAst.Model.Types;
@@ -13,7 +14,7 @@ namespace HexaGen.CppAst.Model.Declarations
     /// </summary>
     public abstract class CppTypeDeclaration : CppType, ICppDeclaration, ICppContainer
     {
-        protected CppTypeDeclaration(CppTypeKind typeKind) : base(typeKind)
+        protected CppTypeDeclaration(CXCursor cursor, CppTypeKind typeKind) : base(cursor, typeKind)
         {
         }
 

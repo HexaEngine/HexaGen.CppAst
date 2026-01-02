@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Declarations;
 using System;
 
@@ -15,8 +16,9 @@ namespace HexaGen.CppAst.Model
         /// <summary>
         /// A default C++ value.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="value"></param>
-        public CppValue(object value)
+        public CppValue(CXCursor cursor, object value) : base(cursor)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }

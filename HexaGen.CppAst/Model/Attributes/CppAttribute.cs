@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using System.Text;
 
 namespace HexaGen.CppAst.Model.Attributes
@@ -11,11 +12,20 @@ namespace HexaGen.CppAst.Model.Attributes
     /// </summary>
     public class CppAttribute : CppElement
     {
-        public CppAttribute(string name, AttributeKind kind)
+        public CppAttribute(CXCursor cursor, string name, AttributeKind kind) : base(cursor)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Kind = kind;
         }
+
+        public CppAttribute(CXComment comment, string name, AttributeKind kind) : base(CXCursor.Null)
+        {
+            Comment = comment;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Kind = kind;
+        }
+
+        public CXComment Comment { get; set; }
 
         /// <summary>
         /// Gets or sets the scope of this attribute

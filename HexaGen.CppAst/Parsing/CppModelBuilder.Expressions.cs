@@ -20,17 +20,17 @@
                 case CXCursorKind.CXCursor_StringLiteral:
                 case CXCursorKind.CXCursor_CharacterLiteral:
                 case CXCursorKind.CXCursor_FixedPointLiteral:
-                    expr = new CppLiteralExpression(kind, cursor.AsText());
+                    expr = new CppLiteralExpression(cursor, kind, cursor.AsText());
                     break;
 
                 case CXCursorKind.CXCursor_ParenExpr:
-                    expr = new CppParenExpression();
+                    expr = new CppParenExpression(cursor);
                     visitChildren = true;
                     break;
 
                 case CXCursorKind.CXCursor_UnaryOperator:
                     var tokens = new Tokenizer(cursor);
-                    expr = new CppUnaryExpression(CppExpressionKind.UnaryOperator)
+                    expr = new CppUnaryExpression(cursor, CppExpressionKind.UnaryOperator)
                     {
                         Operator = tokens.Count > 0 ? tokens.GetString(0) : string.Empty
                     };
@@ -38,17 +38,17 @@
                     break;
 
                 case CXCursorKind.CXCursor_BinaryOperator:
-                    expr = new CppBinaryExpression(CppExpressionKind.BinaryOperator);
+                    expr = new CppBinaryExpression(cursor, CppExpressionKind.BinaryOperator);
                     visitChildren = true;
                     break;
 
                 case CXCursorKind.CXCursor_InitListExpr:
-                    expr = new CppInitListExpression();
+                    expr = new CppInitListExpression(cursor);
                     visitChildren = true;
                     break;
 
                 default:
-                    var rawExpression = new CppRawExpression(kind);
+                    var rawExpression = new CppRawExpression(cursor, kind);
                     rawExpression.AppendTokens(cursor);
                     expr = rawExpression;
                     break;

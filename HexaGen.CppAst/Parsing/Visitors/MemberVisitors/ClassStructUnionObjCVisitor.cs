@@ -40,7 +40,7 @@
                 }
 
                 // Create an anonymous field for the type
-                var cppField = new CppField(cppClass, string.Empty)
+                var cppField = new CppField(cursor, cppClass, string.Empty)
                 {
                     Visibility = containerContext.CurrentVisibility,
                     StorageQualifier = cursor.GetStorageQualifier(),

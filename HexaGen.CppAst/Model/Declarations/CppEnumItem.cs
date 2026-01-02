@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Model.Attributes;
 using HexaGen.CppAst.Model.Expressions;
@@ -19,9 +20,10 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Creates a new instance of this enum item.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name">Name of the enum item.</param>
         /// <param name="value">Associated value of this enum item.</param>
-        public CppEnumItem(string name, long value)
+        public CppEnumItem(CXCursor cursor, string name, long value) : base(cursor)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value;

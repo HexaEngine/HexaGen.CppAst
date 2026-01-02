@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Expressions;
 using HexaGen.CppAst.Model.Interfaces;
 using HexaGen.CppAst.Parsing;
@@ -18,8 +19,9 @@ namespace HexaGen.CppAst.Model
         /// <summary>
         /// Creates a new instance of a macro.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name"></param>
-        public CppMacro(string name)
+        public CppMacro(CXCursor cursor, string name) : base(cursor)
         {
             Name = name;
             Tokens = [];

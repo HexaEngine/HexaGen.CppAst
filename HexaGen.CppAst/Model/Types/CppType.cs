@@ -4,6 +4,7 @@
 
 namespace HexaGen.CppAst.Model.Types
 {
+    using ClangSharp.Interop;
     using HexaGen.CppAst.Model;
 
     /// <summary>
@@ -14,8 +15,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Constructor with the specified type kind.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="typeKind"></param>
-        protected CppType(CppTypeKind typeKind)
+        protected CppType(CXCursor cursor, CppTypeKind typeKind) : base(cursor)
         {
             TypeKind = typeKind;
         }

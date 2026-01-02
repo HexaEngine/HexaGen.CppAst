@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Types;
 using System;
 
@@ -15,11 +16,20 @@ namespace HexaGen.CppAst.Model.Templates
         /// <summary>
         /// Constructor of this template parameter type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name"></param>
-        public CppTemplateParameterType(string name) : base(CppTypeKind.TemplateParameterType)
+        public CppTemplateParameterType(CXCursor cursor, string name) : base(cursor, CppTypeKind.TemplateParameterType)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
+
+        public CppTemplateParameterType(CX_TemplateArgument templateArgument, string name) : base(CXCursor.Null, CppTypeKind.TemplateParameterType)
+        {
+            TemplateArgument = templateArgument;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
+        public CX_TemplateArgument TemplateArgument { get; set; }
 
         /// <summary>
         /// Name of the template parameter.

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Attributes;
@@ -18,7 +19,7 @@ namespace HexaGen.CppAst.Model.Declarations;
 /// </summary>
 public sealed class CppProperty : CppDeclaration, ICppMember, ICppAttributeContainer
 {
-    public CppProperty(CppType type, string name)
+    public CppProperty(CXCursor cursor, CppType type, string name) : base(cursor)
     {
         Type = type ?? throw new ArgumentNullException(nameof(type));
         Name = name;

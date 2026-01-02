@@ -153,7 +153,7 @@ namespace HexaGen.CppAst.Collections
 
     public static class CppContainerListExtensions
     {
-        public static TElement? FindByName<TElement>(this CppContainerList<TElement> list, ReadOnlySpan<char> name) where TElement : CppElement, ICppMember
+        public static TElement? FindElementByName<TElement>(this CppContainerList<TElement> list, ReadOnlySpan<char> name) where TElement : CppElement, ICppMember
         {
             return list.Find(name, static (x, name) => name.SequenceEqual(x.Name));
         }

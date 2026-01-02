@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Extensions;
@@ -22,8 +23,9 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Creates a new instance of this enum.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name">Name of this enum</param>
-        public CppEnum(string name) : base(CppTypeKind.Enum)
+        public CppEnum(CXCursor cursor, string name) : base(cursor, CppTypeKind.Enum)
         {
             Name = name;
             Items = new CppContainerList<CppEnumItem>(this);

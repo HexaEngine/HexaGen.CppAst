@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Extensions;
 using HexaGen.CppAst.Model.Attributes;
@@ -20,9 +21,10 @@ namespace HexaGen.CppAst.Model.Declarations
         /// <summary>
         /// Creates a new instance of a typedef.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="name">Name of the typedef (e.g `XXX`)</param>
         /// <param name="type">Underlying type.</param>
-        public CppTypedef(string name, CppType type) : base(CppTypeKind.Typedef)
+        public CppTypedef(CXCursor cursor, string name, CppType type) : base(cursor, CppTypeKind.Typedef)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             ElementType = type;

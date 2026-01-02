@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Declarations;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Constructor of a function type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="returnType">Return type of this function type.</param>
-        public CppBlockFunctionType(CppType returnType) : base(CppTypeKind.ObjCBlockFunction, returnType)
+        public CppBlockFunctionType(CXCursor cursor, CppType returnType) : base(cursor, CppTypeKind.ObjCBlockFunction, returnType)
         {
         }
     }

@@ -18,7 +18,7 @@
             var propertyName = CXUtil.GetCursorSpelling(cursor);
             var type = Builder.GetCppType(cursor.Type.Declaration, cursor.Type, cursor);
 
-            var cppProperty = new CppProperty(type, propertyName);
+            CppProperty cppProperty = new(cursor, type, propertyName);
             cppProperty.GetterName = cursor.ObjCPropertyGetterName.ToString();
             cppProperty.SetterName = cursor.ObjCPropertySetterName.ToString();
             Builder.ParseAttributes(cursor, cppProperty, true);

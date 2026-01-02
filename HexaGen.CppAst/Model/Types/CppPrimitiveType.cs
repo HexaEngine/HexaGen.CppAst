@@ -139,7 +139,7 @@ namespace HexaGen.CppAst.Model.Types
         /// Base constructor of a primitive
         /// </summary>
         /// <param name="kind"></param>
-        private CppPrimitiveType(CppPrimitiveKind kind) : base(CppTypeKind.Primitive)
+        private CppPrimitiveType(CppPrimitiveKind kind) : base(default, CppTypeKind.Primitive)
         {
             Kind = kind;
             UpdateSize(out _sizeOf);

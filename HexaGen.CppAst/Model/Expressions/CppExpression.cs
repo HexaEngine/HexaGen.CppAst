@@ -16,7 +16,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public abstract class CppExpression : CppElement
     {
-        protected CppExpression(CppExpressionKind kind)
+        protected CppExpression(CXCursor cursor, CppExpressionKind kind) : base(cursor)
         {
             Kind = kind;
         }
@@ -62,7 +62,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppRawExpression : CppExpression
     {
-        public CppRawExpression(CppExpressionKind kind) : base(kind)
+        public CppRawExpression(CXCursor cursor, CppExpressionKind kind) : base(cursor, kind)
         {
             Tokens = [];
         }
@@ -107,7 +107,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppInitListExpression : CppExpression
     {
-        public CppInitListExpression() : base(CppExpressionKind.InitList)
+        public CppInitListExpression(CXCursor cursor) : base(cursor, CppExpressionKind.InitList)
         {
         }
 
@@ -126,7 +126,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppBinaryExpression : CppExpression
     {
-        public CppBinaryExpression(CppExpressionKind kind) : base(kind)
+        public CppBinaryExpression(CXCursor cursor, CppExpressionKind kind) : base(cursor, kind)
         {
         }
 
@@ -161,7 +161,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppUnaryExpression : CppExpression
     {
-        public CppUnaryExpression(CppExpressionKind kind) : base(kind)
+        public CppUnaryExpression(CXCursor cursor, CppExpressionKind kind) : base(cursor, kind)
         {
         }
 
@@ -188,7 +188,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppParenExpression : CppExpression
     {
-        public CppParenExpression() : base(CppExpressionKind.Paren)
+        public CppParenExpression(CXCursor cursor) : base(cursor, CppExpressionKind.Paren)
         {
         }
 
@@ -208,7 +208,7 @@ namespace HexaGen.CppAst.Model.Expressions
     /// </summary>
     public class CppLiteralExpression : CppExpression
     {
-        public CppLiteralExpression(CppExpressionKind kind, string value) : base(kind)
+        public CppLiteralExpression(CXCursor cursor, CppExpressionKind kind, string value) : base(cursor, kind)
         {
             Value = value;
         }

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Extensions;
 using System;
 
@@ -15,8 +16,9 @@ namespace HexaGen.CppAst.Model.Types
         /// <summary>
         /// Constructor of a reference type.
         /// </summary>
+        /// <param name="cursor"></param>
         /// <param name="elementType">The element type referenced to.</param>
-        public CppReferenceType(CppType elementType) : base(CppTypeKind.Reference, elementType)
+        public CppReferenceType(CXCursor cursor, CppType elementType) : base(cursor, CppTypeKind.Reference, elementType)
         {
         }
 
@@ -37,7 +39,7 @@ namespace HexaGen.CppAst.Model.Types
         public override CppType GetCanonicalType()
         {
             var elementTypeCanonical = ElementType.GetCanonicalType();
-            return ReferenceEquals(elementTypeCanonical, ElementType) ? this : new CppReferenceType(elementTypeCanonical);
+            return ReferenceEquals(elementTypeCanonical, ElementType) ? this : new CppReferenceType(Cursor.CanonicalCursor, elementTypeCanonical);
         }
     }
 }

@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp;
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Attributes;
 using HexaGen.CppAst.Model.Interfaces;
 using System.Collections.Generic;
@@ -14,7 +16,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentFull : CppComment
     {
-        public CppCommentFull() : base(CppCommentKind.Full)
+        public CppCommentFull(CXComment comment) : base(comment, CppCommentKind.Full)
         {
         }
 
@@ -35,10 +37,12 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public abstract class CppComment
     {
-        protected CppComment(CppCommentKind kind)
+        protected CppComment(CXComment comment, CppCommentKind kind)
         {
             Kind = kind;
         }
+
+        public CXComment Comment { get; set; }
 
         /// <summary>
         /// The kind of comments.
@@ -85,7 +89,7 @@ namespace HexaGen.CppAst.Model.Metadata
                 var txt = ctxt.Text.Trim();
                 if (txt.StartsWith("[[") && txt.EndsWith("]]"))
                 {
-                    attrContainer.Attributes.Add(new CppAttribute("comment", AttributeKind.CommentAttribute)
+                    attrContainer.Attributes.Add(new CppAttribute(Comment, "comment", AttributeKind.CommentAttribute)
                     {
                         Arguments = txt,
                         Scope = "",
@@ -109,7 +113,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public abstract class CppCommentCommand : CppComment
     {
-        protected CppCommentCommand(CppCommentKind kind) : base(kind)
+        protected CppCommentCommand(CXComment comment, CppCommentKind kind) : base(comment, kind)
         {
             Arguments = [];
         }
@@ -136,7 +140,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentParagraph : CppComment
     {
-        public CppCommentParagraph() : base(CppCommentKind.Paragraph)
+        public CppCommentParagraph(CXComment comment) : base(comment, CppCommentKind.Paragraph)
         {
         }
 
@@ -170,7 +174,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentBlockCommand : CppCommentCommand
     {
-        public CppCommentBlockCommand() : base(CppCommentKind.BlockCommand)
+        public CppCommentBlockCommand(CXComment comment) : base(comment, CppCommentKind.BlockCommand)
         {
         }
 
@@ -186,7 +190,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentInlineCommand : CppCommentCommand
     {
-        public CppCommentInlineCommand() : base(CppCommentKind.InlineCommand)
+        public CppCommentInlineCommand(CXComment comment) : base(comment, CppCommentKind.InlineCommand)
         {
         }
 
@@ -215,7 +219,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentParamCommand : CppCommentCommand
     {
-        public CppCommentParamCommand() : base(CppCommentKind.ParamCommand)
+        public CppCommentParamCommand(CXComment comment) : base(comment, CppCommentKind.ParamCommand)
         {
         }
 
@@ -258,7 +262,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentTemplateParamCommand : CppCommentCommand
     {
-        public CppCommentTemplateParamCommand() : base(CppCommentKind.TemplateParamCommand)
+        public CppCommentTemplateParamCommand(CXComment comment) : base(comment, CppCommentKind.TemplateParamCommand)
         {
         }
 
@@ -326,7 +330,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentVerbatimBlockCommand : CppCommentCommand
     {
-        public CppCommentVerbatimBlockCommand() : base(CppCommentKind.VerbatimBlockCommand)
+        public CppCommentVerbatimBlockCommand(CXComment comment) : base(comment, CppCommentKind.VerbatimBlockCommand)
         {
         }
 
@@ -343,7 +347,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentVerbatimBlockLine : CppCommentTextBase
     {
-        public CppCommentVerbatimBlockLine() : base(CppCommentKind.VerbatimBlockLine)
+        public CppCommentVerbatimBlockLine(CXComment comment) : base(comment, CppCommentKind.VerbatimBlockLine)
         {
         }
 
@@ -359,7 +363,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public abstract class CppCommentTextBase : CppComment
     {
-        protected CppCommentTextBase(CppCommentKind kind) : base(kind)
+        protected CppCommentTextBase(CXComment comment, CppCommentKind kind) : base(comment, kind)
         {
         }
 
@@ -376,7 +380,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentText : CppCommentTextBase
     {
-        public CppCommentText() : base(CppCommentKind.Text)
+        public CppCommentText(CXComment comment) : base(comment, CppCommentKind.Text)
         {
         }
     }
@@ -386,7 +390,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentVerbatimLine : CppCommentTextBase
     {
-        public CppCommentVerbatimLine() : base(CppCommentKind.VerbatimLine)
+        public CppCommentVerbatimLine(CXComment comment) : base(comment, CppCommentKind.VerbatimLine)
         {
         }
 
@@ -402,7 +406,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public abstract class CppCommentHtmlTag : CppComment
     {
-        protected CppCommentHtmlTag(CppCommentKind kind) : base(kind)
+        protected CppCommentHtmlTag(CXComment comment, CppCommentKind kind) : base(comment, kind)
         {
         }
 
@@ -416,7 +420,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentHtmlStartTag : CppCommentHtmlTag
     {
-        public CppCommentHtmlStartTag() : base(CppCommentKind.HtmlStartTag)
+        public CppCommentHtmlStartTag(CXComment comment) : base(comment, CppCommentKind.HtmlStartTag)
         {
             Attributes = [];
         }
@@ -458,7 +462,7 @@ namespace HexaGen.CppAst.Model.Metadata
     /// </summary>
     public class CppCommentHtmlEndTag : CppCommentHtmlTag
     {
-        public CppCommentHtmlEndTag() : base(CppCommentKind.HtmlEndTag)
+        public CppCommentHtmlEndTag(CXComment comment) : base(comment, CppCommentKind.HtmlEndTag)
         {
         }
 

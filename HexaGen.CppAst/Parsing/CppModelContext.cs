@@ -20,11 +20,11 @@ namespace HexaGen.CppAst.Parsing
         private readonly TypedefResolver typedefResolver = new();
         private readonly Dictionary<CursorKey, CppTemplateParameterType> objCTemplateParameterTypes;
 
-        public CppModelContext(CppModelBuilder builder)
+        public CppModelContext(CppModelBuilder builder, CXTranslationUnit translationUnit)
         {
             Builder = builder;
             containers = [];
-            RootCompilation = new();
+            RootCompilation = new(translationUnit);
             objCTemplateParameterTypes = [];
             userRootContainerContext = new(RootCompilation, CppContainerContextType.User, CppVisibility.Default);
             systemRootContainerContext = new(RootCompilation.System, CppContainerContextType.System, CppVisibility.Default);
@@ -104,7 +104,7 @@ namespace HexaGen.CppAst.Parsing
             if (!objCTemplateParameterTypes.TryGetValue(key, out var templateParameterType))
             {
                 var templateParameterName = CXUtil.GetCursorSpelling(cursor);
-                templateParameterType = new(templateParameterName);
+                templateParameterType = new(cursor, templateParameterName);
                 objCTemplateParameterTypes.Add(key, templateParameterType);
             }
             return templateParameterType;

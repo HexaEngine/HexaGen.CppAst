@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.Model.Expressions;
 
 namespace HexaGen.CppAst.Utilities
@@ -18,6 +19,8 @@ namespace HexaGen.CppAst.Utilities
         {
             this.tokens = tokens;
         }
+
+        public CXCursor Cursor => tokens.Cursor;
 
         public bool Skip(string expectedText)
         {

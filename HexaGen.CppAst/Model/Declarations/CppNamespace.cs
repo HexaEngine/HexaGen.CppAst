@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using ClangSharp.Interop;
 using HexaGen.CppAst.AttributeUtils;
 using HexaGen.CppAst.Collections;
 using HexaGen.CppAst.Model.Attributes;
@@ -21,7 +22,7 @@ namespace HexaGen.CppAst.Model.Declarations
         /// Creates a namespace with the specified name.
         /// </summary>
         /// <param name="name">Name of the namespace.</param>
-        public CppNamespace(string name)
+        public CppNamespace(CXCursor cursor, string name) : base(cursor)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Fields = new CppContainerList<CppField>(this);

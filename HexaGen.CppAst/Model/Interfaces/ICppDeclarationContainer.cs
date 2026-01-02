@@ -55,16 +55,16 @@ namespace HexaGen.CppAst.Model.Interfaces
     {
         public static CppElement? FindByName<T>(this T container, ReadOnlySpan<char> name) where T : ICppDeclarationContainer
         {
-            var c = container.Classes.FindByName(name);
+            var c = container.Classes.FindElementByName(name);
             if (c != null) return c;
 
-            var e = container.Enums.FindByName(name);
+            var e = container.Enums.FindElementByName(name);
             if (e != null) return e;
 
-            var f = container.Functions.FindByName(name);
+            var f = container.Functions.FindElementByName(name);
             if (f != null) return f;
 
-            var t = container.Typedefs.FindByName(name);
+            var t = container.Typedefs.FindElementByName(name);
             if (t != null) return t;
 
             return null;

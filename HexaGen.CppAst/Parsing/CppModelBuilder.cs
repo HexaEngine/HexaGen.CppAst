@@ -20,9 +20,9 @@ namespace HexaGen.CppAst.Parsing
     {
         private readonly CppModelContext context;
 
-        public CppModelBuilder()
+        public CppModelBuilder(CXTranslationUnit translationUnit)
         {
-            context = new CppModelContext(this);
+            context = new CppModelContext(this, translationUnit);
         }
 
         public bool AutoSquashTypedef { get; set; }
@@ -48,7 +48,7 @@ namespace HexaGen.CppAst.Parsing
                 case CXCursorKind.CXCursor_TemplateTypeParameter:
                     {
                         var templateParameterName = CXUtil.GetCursorSpelling(cursor);
-                        CppTemplateParameterType templateParameterType = new(templateParameterName);
+                        CppTemplateParameterType templateParameterType = new(cursor, templateParameterName);
                         return templateParameterType;
                     }
                 case CXCursorKind.CXCursor_NonTypeTemplateParameter:
@@ -57,7 +57,7 @@ namespace HexaGen.CppAst.Parsing
                         var cppType = GetCppType(type.Declaration, type, cursor);
                         var name = CXUtil.GetCursorSpelling(cursor);
 
-                        CppTemplateParameterNonType templateParameterType = new(name, cppType);
+                        CppTemplateParameterNonType templateParameterType = new(cursor, name, cppType);
 
                         return templateParameterType;
                     }
@@ -66,7 +66,7 @@ namespace HexaGen.CppAst.Parsing
                         // TODO: add template template parameter support here
                         RootCompilation.Diagnostics.Warning($"Unhandled template parameter: {cursor.Kind}/{CXUtil.GetCursorSpelling(cursor)}", cursor.GetSourceLocation());
                         var templateParameterName = CXUtil.GetCursorSpelling(cursor);
-                        CppTemplateParameterType templateParameterType = new(templateParameterName);
+                        CppTemplateParameterType templateParameterType = new(cursor, templateParameterName);
                         return templateParameterType;
                     }
             }
@@ -98,17 +98,17 @@ namespace HexaGen.CppAst.Parsing
             switch (resultEval.Kind)
             {
                 case CXEvalResultKind.CXEval_Int:
-                    value = new(resultEval.AsLongLong);
+                    value = new(cursor, resultEval.AsLongLong);
                     break;
 
                 case CXEvalResultKind.CXEval_Float:
-                    value = new(resultEval.AsDouble);
+                    value = new(cursor, resultEval.AsDouble);
                     break;
 
                 case CXEvalResultKind.CXEval_ObjCStrLiteral:
                 case CXEvalResultKind.CXEval_StrLiteral:
                 case CXEvalResultKind.CXEval_CFStr:
-                    value = new(resultEval.AsStr);
+                    value = new(cursor, resultEval.AsStr);
                     break;
 
                 case CXEvalResultKind.CXEval_UnExposed:

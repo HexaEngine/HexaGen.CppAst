@@ -141,15 +141,6 @@ namespace HexaGen.CppAst.Parsing
 
             using (var createIndex = CXIndex.Create())
             {
-                var builder = new CppModelBuilder
-                {
-                    AutoSquashTypedef = options.AutoSquashTypedef,
-                    ParseSystemIncludes = options.ParseSystemIncludes,
-                    ParseTokenAttributeEnabled = options.ParseTokenAttributes,
-                    ParseCommentAttributeEnabled = options.ParseCommentAttribute,
-                };
-                var compilation = builder.RootCompilation;
-
                 string rootFileName = CppAstRootFileName;
                 string rootFileContent = null;
 
@@ -181,8 +172,6 @@ namespace HexaGen.CppAst.Parsing
                 // TODO: Add debug
                 rootFileContent = tempBuilder.ToString();
 
-                compilation.InputText = rootFileContent;
-
                 CXTranslationUnit translationUnit;
                 using (CXUnsavedFile unsavedFile = CXUnsavedFile.Create(rootFileName, rootFileContent))
                 {
@@ -194,6 +183,16 @@ namespace HexaGen.CppAst.Parsing
                         , unsavedFiles
                         , translationFlags);
                 }
+
+                CppModelBuilder builder = new(translationUnit)
+                {
+                    AutoSquashTypedef = options.AutoSquashTypedef,
+                    ParseSystemIncludes = options.ParseSystemIncludes,
+                    ParseTokenAttributeEnabled = options.ParseTokenAttributes,
+                    ParseCommentAttributeEnabled = options.ParseCommentAttribute,
+                };
+                var compilation = builder.RootCompilation;
+                compilation.InputText = rootFileContent;
 
                 bool skipProcessing = false;
 
@@ -238,8 +237,6 @@ namespace HexaGen.CppAst.Parsing
                 {
                     translationUnit.Cursor.VisitChildren(builder.VisitTranslationUnit, clientData: default);
                 }
-
-                translationUnit.Dispose();
 
                 return compilation;
             }

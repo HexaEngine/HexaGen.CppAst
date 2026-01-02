@@ -25,7 +25,7 @@
                     return cppType;
                 }
 
-                return new CppQualifiedType(CppTypeQualifier.Const, cppType);
+                return new CppQualifiedType(cursor, CppTypeQualifier.Const, cppType);
             }
             else if (type.IsVolatileQualified)
             {
@@ -35,7 +35,7 @@
                     return cppType;
                 }
 
-                return new CppQualifiedType(CppTypeQualifier.Volatile, cppType);
+                return new CppQualifiedType(cursor, CppTypeQualifier.Volatile, cppType);
             }
 
             return cppType;
@@ -52,10 +52,10 @@
             {
                 case CXTypeKind.CXType_ObjCObjectPointer:
                 case CXTypeKind.CXType_Pointer:
-                    return new CppPointerType(GetCppType(type.PointeeType.Declaration, type.PointeeType, parent)) { SizeOf = (int)type.SizeOf };
+                    return new CppPointerType(cursor, GetCppType(type.PointeeType.Declaration, type.PointeeType, parent)) { SizeOf = (int)type.SizeOf };
 
                 case CXTypeKind.CXType_LValueReference:
-                    return new CppReferenceType(GetCppType(type.PointeeType.Declaration, type.PointeeType, parent));
+                    return new CppReferenceType(cursor, GetCppType(type.PointeeType.Declaration, type.PointeeType, parent));
 
                 case CXTypeKind.CXType_Record:
                     return VisitClassDecl(cursor);
@@ -82,7 +82,7 @@
                 case CXTypeKind.CXType_IncompleteArray:
                     {
                         var elementType = GetCppType(type.ArrayElementType.Declaration, type.ArrayElementType, parent);
-                        return new CppArrayType(elementType, (int)type.ArraySize);
+                        return new CppArrayType(cursor, elementType, (int)type.ArraySize);
                     }
 
                 case CXTypeKind.CXType_DependentSizedArray:
@@ -90,7 +90,7 @@
                         // TODO: this is not yet supported
                         RootCompilation.Diagnostics.Warning($"Dependent sized arrays `{CXUtil.GetTypeSpelling(type)}` from `{CXUtil.GetCursorSpelling(parent)}` is not supported", parent.GetSourceLocation());
                         var elementType = GetCppType(type.ArrayElementType.Declaration, type.ArrayElementType, parent);
-                        return new CppArrayType(elementType, (int)type.ArraySize);
+                        return new CppArrayType(cursor, elementType, (int)type.ArraySize);
                     }
 
                 case CXTypeKind.CXType_Unexposed:
@@ -102,7 +102,7 @@
                             return GetCppType(type.Declaration, type.Declaration.Type, parent);
                         }
 
-                        CppUnexposedType cppUnexposedType = new(CXUtil.GetTypeSpelling(type)) { SizeOf = (int)type.SizeOf };
+                        CppUnexposedType cppUnexposedType = new(cursor, CXUtil.GetTypeSpelling(type)) { SizeOf = (int)type.SizeOf };
                         var templateParameters = ParseTemplateSpecializedArguments(cursor, type);
                         if (templateParameters != null)
                         {
@@ -141,7 +141,7 @@
                 default:
                     {
                         WarningUnhandled(cursor, parent, type);
-                        return new CppUnexposedType(CXUtil.GetTypeSpelling(type)) { SizeOf = (int)type.SizeOf };
+                        return new CppUnexposedType(cursor, CXUtil.GetTypeSpelling(type)) { SizeOf = (int)type.SizeOf };
                     }
             }
         }
@@ -165,8 +165,8 @@
             var returnType = GetCppType(type.ResultType.Declaration, type.ResultType, cursor);
 
             var cppFunction = isBlockFunctionType
-                ? (CppFunctionTypeBase)new CppBlockFunctionType(returnType)
-                : new CppFunctionType(returnType);
+                ? (CppFunctionTypeBase)new CppBlockFunctionType(cursor, returnType)
+                : new CppFunctionType(cursor, returnType);
             cppFunction.CallingConvention = type.GetCallingConvention();
 
             // We don't use this but use the visitor children to try to recover the parameter names
@@ -190,7 +190,7 @@
                     var name = CXUtil.GetCursorSpelling(argCursor);
                     var parameterType = builder.GetCppType(argCursor.Type.Declaration, argCursor.Type, argCursor);
 
-                    cppFunction.Parameters.Add(new CppParameter(parameterType, name));
+                    cppFunction.Parameters.Add(new CppParameter(argCursor, parameterType, name));
                     ctx.IsParsingParameter = true;
                 }
                 return ctx.IsParsingParameter ? CXChildVisitResult.CXChildVisit_Continue : CXChildVisitResult.CXChildVisit_Recurse;
@@ -240,6 +240,11 @@
         public unsafe CppClass VisitClassDecl(CXCursor cursor)
         {
             var cppStruct = this.context.GetOrCreateDeclContainer<CppClass>(cursor, out var context);
+            if (cursor.Definition.Kind != CXCursorKind.CXCursor_FirstInvalid && cursor != cursor.Definition)
+            {
+                var definition = VisitClassDecl(cursor.Definition);
+                cppStruct.Definition = definition;
+            }
             if (cursor.IsCursorDefinition(cppStruct) && !context.IsChildrenVisited)
             {
                 ParseAttributes(cursor, cppStruct, false);
@@ -255,8 +260,8 @@
                 {
                     foreach (var prop in cppStruct.Properties)
                     {
-                        prop.Getter = cppStruct.Functions.FindByName(prop.GetterName);
-                        prop.Setter = cppStruct.Functions.FindByName(prop.SetterName);
+                        prop.Getter = cppStruct.Functions.FindElementByName(prop.GetterName);
+                        prop.Setter = cppStruct.Functions.FindElementByName(prop.SetterName);
                     }
                 }
 
